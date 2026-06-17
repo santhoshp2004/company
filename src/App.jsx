@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme, THEMES } from './context/ThemeContext';
 import Navbar          from './components/Navbar';
 import Footer          from './components/Footer';
 import ProtectedRoute  from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ThemeSwitcher   from './components/ThemeSwitcher';
 
 import Home            from './pages/Home';
@@ -20,6 +21,7 @@ import Register        from './pages/Register';
 import Profile         from './pages/Profile';
 import Dashboard       from './pages/Dashboard';
 import BrandShowcase   from './pages/BrandShowcase';
+import AdminLayout     from './admin/AdminLayout';
 
 /** Smooth page transition wrapper */
 function PageTransition({ children }) {
@@ -41,13 +43,13 @@ function PageTransition({ children }) {
 
 /** Theme-aware main layout */
 function MainLayout() {
+  const location = useLocation();
   const { theme, t } = useTheme();
-  const isLight = theme === THEMES.VISION;
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className={`flex flex-col min-h-screen theme-transition`}
-         style={t.pageBgStyle}>
-      <Navbar />
+    <div className={`flex flex-col min-h-screen theme-transition`} style={t.pageBgStyle}>
+      {!isAdminRoute && <Navbar />}
       <div className="flex-1">
         <PageTransition>
           <Routes>
@@ -61,13 +63,17 @@ function MainLayout() {
             <Route path="/brand"         element={<BrandShowcase />} />
             <Route path="/profile"       element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/dashboard"     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="*"              element={<NotFound />} />
+            <Route path="/admin/*"       element={
+              <AdminProtectedRoute roles={['Super Admin', 'HR Admin', 'Content Manager', 'Recruiter', 'Employee']}>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
       </div>
-      <Footer />
-      {/* Floating theme switcher — rendered in all non-auth pages */}
-      <ThemeSwitcher />
+      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <ThemeSwitcher />}
     </div>
   );
 }

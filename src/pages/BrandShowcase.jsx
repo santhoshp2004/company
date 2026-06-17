@@ -405,10 +405,10 @@ export default function BrandShowcase() {
                 <div className="mt-6 rounded-2xl p-6 border border-white/8" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <h3 className="text-sm font-bold text-white mb-3">Icon Design Notes</h3>
                   <ul className="space-y-2 text-xs text-slate-400 leading-relaxed">
-                    <li className="flex gap-2"><span className="text-blue-400">●</span> Three interlocked orbital arcs represent <strong className="text-white">connectivity, AI intelligence, and infinite possibility</strong></li>
+                    <li className="flex gap-2"><span className="text-blue-400">●</span> Three interlocked orbital arcs represent <strong className="text-white">connectivity, innovation, and infinite possibility</strong></li>
                     <li className="flex gap-2"><span className="text-violet-400">●</span> The flowing S-curve subtly encodes the founder initial <strong className="text-white">S (Santhosh)</strong> — visible as a connectivity arc</li>
-                    <li className="flex gap-2"><span className="text-cyan-400">●</span> Three orbital nodes (Blue, Violet, Cyan) represent the three product pillars: <strong className="text-white">SaaS · AI · Cloud</strong></li>
-                    <li className="flex gap-2"><span className="text-emerald-400">●</span> Central nucleus symbolises the <strong className="text-white">core intelligence</strong> radiating outward to all connections</li>
+                    <li className="flex gap-2"><span className="text-cyan-400">●</span> Three orbital nodes (Blue, Violet, Cyan) represent the three product pillars: <strong className="text-white">Software · Cloud · Digital</strong></li>
+                    <li className="flex gap-2"><span className="text-emerald-400">●</span> Central nucleus symbolises the <strong className="text-white">core platform</strong> radiating outward to all connections</li>
                   </ul>
                 </div>
               </div>

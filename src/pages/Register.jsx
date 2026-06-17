@@ -35,8 +35,13 @@ export default function Register() {
 
     setLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    register({ name: form.name, email: form.email, password: form.password });
-    navigate('/dashboard');
+    const response = await register({ name: form.name, email: form.email, password: form.password });
+    if (response.success) {
+      navigate('/dashboard');
+    } else {
+      setErrors({ email: response.error || 'Registration failed' });
+      setLoading(false);
+    }
   }
 
   // Password strength
@@ -64,12 +69,16 @@ export default function Register() {
           {/* Header */}
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-1">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 via-purple-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/30 hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6,#06B6D4)' }}>
                 <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 16V4L10 13V4M10 13V16M10 13L16 4V16" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="10" r="7" stroke="white" strokeWidth="1" strokeDasharray="28 16" strokeLinecap="round" opacity="0.5"/>
+                  <path d="M 11.5 5 C 14 5,15 7,13.2 8.5 C 11.4 10,8 9.5,7 11 C 6 12.5,7.2 15,9 15"
+                        stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                  <circle cx="10" cy="10" r="1.8" fill="white"/>
                 </svg>
               </div>
-              <span className="text-lg font-bold gradient-text">NexusAI</span>
+              <span className="text-lg font-bold" style={{ background:'linear-gradient(90deg,#3B82F6,#8B5CF6)', WebkitBackgroundClip:'text', backgroundClip:'text', color:'transparent' }}>USEMETA</span>
             </Link>
             <h1 className="text-2xl font-black text-white mt-4 mb-1">Create your account</h1>
             <p className="text-sm text-gray-500">Start your 14-day free trial today</p>
@@ -86,7 +95,7 @@ export default function Register() {
                 <input
                   id="name" name="name" type="text" autoComplete="name"
                   value={form.name} onChange={handleChange}
-                  placeholder="Alex Johnson"
+                  placeholder="Your full name"
                   className={`input-field pl-10 ${errors.name ? 'border-red-500/60' : ''}`}
                 />
               </div>

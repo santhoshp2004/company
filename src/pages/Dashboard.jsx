@@ -4,15 +4,15 @@ import { products } from '../data/products';
 
 const stats = [
   { label: 'Active Products', value: '3', icon: '📦', color: 'from-blue-500 to-cyan-500' },
-  { label: 'API Calls Today',  value: '24.8K', icon: '⚡', color: 'from-purple-500 to-pink-500' },
-  { label: 'Uptime',           value: '99.99%', icon: '🟢', color: 'from-green-500 to-teal-500' },
-  { label: 'Team Members',     value: '12',    icon: '👥', color: 'from-orange-500 to-yellow-500' },
+  { label: 'Requests Today',  value: '24.8K', icon: '⚡', color: 'from-purple-500 to-pink-500' },
+  { label: 'Uptime',          value: '99.99%', icon: '🟢', color: 'from-green-500 to-teal-500' },
+  { label: 'Team Members',    value: '12',    icon: '👥', color: 'from-orange-500 to-yellow-500' },
 ];
 
 const recentActivity = [
-  { icon: '🚀', text: 'NexusFlow workflow deployed successfully', time: '2m ago', type: 'success' },
-  { icon: '🔔', text: 'New integration connected: Slack webhook', time: '1h ago', type: 'info' },
-  { icon: '📊', text: 'Monthly analytics report generated', time: '3h ago', type: 'info' },
+  { icon: '🚀', text: 'FlowBuilder workflow published successfully', time: '2m ago', type: 'success' },
+  { icon: '🔔', text: 'New integration connected: webhook endpoint', time: '1h ago', type: 'info' },
+  { icon: '📊', text: 'Monthly usage report generated', time: '3h ago', type: 'info' },
   { icon: '🔒', text: 'Security scan completed — no issues found', time: '5h ago', type: 'success' },
   { icon: '💳', text: 'Subscription renewed for next billing cycle', time: '1d ago', type: 'info' },
 ];

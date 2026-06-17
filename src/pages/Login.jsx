@@ -449,7 +449,7 @@ export default function Login() {
     setSubm(true); setGo(false); setRace(R.RACING); setProgress(60);
 
     raceRef.current = setTimeout(async()=>{
-      const res = login(form);
+      const res = await login(form);
       clearInterval(progRef.current);
       if (res.success) {
         setProgress(100); setRace(R.WIN);

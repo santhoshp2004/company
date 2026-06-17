@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getProductById, products } from '../data/products';
 import { useAuth } from '../context/AuthContext';
 
@@ -124,6 +125,32 @@ export default function ProductDetails() {
                 </div>
                 <span className="text-gray-300 text-sm leading-relaxed">{feature}</span>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Product snapshots ── */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-sm text-primary-400 uppercase tracking-[0.24em] mb-2">Product Screenshots</p>
+              <h2 className="text-3xl font-bold text-white">Visualise the platform in action</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {product.screenshots?.map((screenshot) => (
+              <motion.div key={screenshot.title}
+                whileHover={{ y: -6 }}
+                className="glass rounded-3xl p-6 border border-white/10 shadow-xl shadow-black/10 transition-all duration-300">
+                <div className="h-44 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.28),_transparent_35%)]" />
+                  <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-cyan-400/15 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-sm font-semibold text-white/90">{screenshot.title}</div>
+                </div>
+                <div className="mt-5">
+                  <p className="text-sm text-gray-300 leading-relaxed">{screenshot.subtitle}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>

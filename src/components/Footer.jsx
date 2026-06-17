@@ -38,8 +38,16 @@ export default function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Logo />
             <p className={`text-sm leading-relaxed max-w-xs ${muteColor}`}>
-              Transform Ideas Into Digital Reality. USEMETA builds intelligent SaaS products for modern teams — founded by Santhosh.
+              Building digital products for modern businesses. USEMETA delivers software solutions, cloud services, and enterprise platforms — founded by Santhosh.
             </p>
+            <div className="space-y-1">
+              <a href="mailto:santhoshp232004@gmail.com" className={`flex items-center gap-2 text-xs transition-colors ${isLight?'text-slate-400 hover:text-blue-600':'text-gray-500 hover:text-gray-300'}`}>
+                <span>📧</span> santhoshp232004@gmail.com
+              </a>
+              <a href="tel:9976017966" className={`flex items-center gap-2 text-xs transition-colors ${isLight?'text-slate-400 hover:text-blue-600':'text-gray-500 hover:text-gray-300'}`}>
+                <span>📞</span> +91 9976017966
+              </a>
+            </div>
             <div className="flex items-center gap-2.5">
               {socials.map(({ name, href, d }) => (
                 <a key={name} href={href} aria-label={name}
@@ -70,7 +78,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className={`mt-10 pt-6 border-t ${isLight ? 'border-slate-100' : 'border-white/8'} flex flex-col sm:flex-row items-center justify-between gap-4`}>
           <p className={`text-xs ${muteColor}`}>
-            © {new Date().getFullYear()} USEMETA, Inc. — Founded by Santhosh. All rights reserved.
+            © 2026 USEMETA. All Rights Reserved. Founded by Santhosh.
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"/>

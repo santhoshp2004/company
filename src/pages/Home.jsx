@@ -5,29 +5,29 @@ import ProductCard from '../components/ProductCard';
 import { useTheme, THEMES } from '../context/ThemeContext';
 
 /* ── Trusted partners ── */
-const trustedCompanies = ['TechCorp', 'BuildBase', 'CloudEdge', 'DataBridge', 'SoftWave', 'NetForge', 'CodeNest'];
+const trustedCompanies = ['Horizon Labs', 'BrightPath', 'CloudEdge', 'DataBridge', 'SoftWave', 'NetForge', 'BuildBase'];
 
 /* ── Testimonials ── */
 const testimonials = [
   {
-    name: 'Emily Chen',
-    role: 'CTO at BuildBase',
-    avatar: 'E',
+    name: 'Sarah K.',
+    role: 'Head of Engineering, Horizon Labs',
+    avatar: 'S',
     color: 'from-pink-500 to-rose-500',
-    quote: "USEMETA's platform helped us ship 3× faster. The products integrate seamlessly and the support team is world-class.",
+    quote: "USEMETA's platform helped us ship 3× faster. The products integrate seamlessly and the support from Santhosh's team is outstanding.",
     stars: 5,
   },
   {
-    name: 'Marcus Johnson',
-    role: 'VP Engineering, CloudEdge',
+    name: 'Marcus J.',
+    role: 'VP Technology, CloudEdge',
     avatar: 'M',
     color: 'from-blue-500 to-cyan-500',
     quote: 'We replaced four separate software tools with USEMETA products. Our stack is leaner, faster, and our team loves it.',
     stars: 5,
   },
   {
-    name: 'Aisha Patel',
-    role: 'Head of Product, DataBridge',
+    name: 'Aisha P.',
+    role: 'Product Lead, BrightPath',
     avatar: 'A',
     color: 'from-purple-500 to-indigo-500',
     quote: 'The analytics and workflow tools are best in class. Return on investment was clear within the first month.',
@@ -40,7 +40,7 @@ const advantages = [
   {
     icon: '⚡',
     title: 'High-Performance Infrastructure',
-    desc: 'Sub-50ms API responses delivered by a globally distributed cloud network across 35 data centres.',
+    desc: 'Sub-50ms response times delivered by a globally distributed cloud network across 35 data centres.',
   },
   {
     icon: '🔒',
@@ -59,7 +59,7 @@ const advantages = [
   },
   {
     icon: '📊',
-    title: 'Unified Analytics',
+    title: 'Unified Reporting',
     desc: 'One dashboard to monitor all your products. Actionable insights with automated anomaly alerts.',
   },
   {
@@ -195,7 +195,7 @@ export default function Home() {
               <span className={t.gradientText}>in one platform</span>
             </h2>
             <p className={`mt-4 max-w-xl mx-auto ${subTxtCls}`}>
-              Six powerful software products designed to work together — each best-in-class on its own, unstoppable as a suite.
+              Six powerful software products designed to work together — each best-in-class on its own, stronger as a suite.
             </p>
           </Section>
 

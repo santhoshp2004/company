@@ -1,81 +1,67 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api } from '../utils/api';
 
-// Auth context — manages user session globally for USEMETA platform
 const AuthContext = createContext(null);
 
+const STORAGE_KEY = 'beta_admin_session';
+
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Rehydrate session from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('usemeta_user');
+    const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      try { setUser(JSON.parse(stored)); }
-      catch { localStorage.removeItem('usemeta_user'); }
+      try {
+        setUser(JSON.parse(stored));
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
     setLoading(false);
   }, []);
 
-  // Register — stores profile + credentials in localStorage
-  const register = useCallback(({ name, email, password }) => {
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      avatar: name.charAt(0).toUpperCase(),
-      joinedAt: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      plan: 'Free',
-    };
-    localStorage.setItem('usemeta_user', JSON.stringify(newUser));
-    const creds = JSON.parse(localStorage.getItem('usemeta_credentials') || '[]');
-    creds.push({ email, password });
-    localStorage.setItem('usemeta_credentials', JSON.stringify(creds));
-    setUser(newUser);
-    return { success: true };
+  const persistSession = useCallback((session) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    if (session.token) localStorage.setItem('beta_admin_token', session.token);
+    setUser(session);
   }, []);
 
-  // Login — validates credentials from localStorage
-  const login = useCallback(({ email, password }) => {
-    const creds = JSON.parse(localStorage.getItem('usemeta_credentials') || '[]');
-    const match = creds.find((c) => c.email === email && c.password === password);
-    if (!match) return { success: false, error: 'Invalid email or password.' };
-
-    const stored = localStorage.getItem('usemeta_user');
-    if (stored) {
-      const u = JSON.parse(stored);
-      if (u.email === email) { setUser(u); return { success: true }; }
+  const login = useCallback(async ({ email, password }) => {
+    try {
+      const response = await api.login({ email, password });
+      if (response?.token) {
+        persistSession({
+          id: response.user._id,
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role,
+          token: response.token,
+        });
+        return { success: true };
+      }
+      return { success: false, error: 'Invalid credentials.' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Authentication failed.' };
     }
-    const u = {
-      id: Date.now(),
-      name: email.split('@')[0],
-      email,
-      avatar: email.charAt(0).toUpperCase(),
-      joinedAt: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      plan: 'Free',
-    };
-    localStorage.setItem('usemeta_user', JSON.stringify(u));
-    setUser(u);
-    return { success: true };
-  }, []);
+  }, [persistSession]);
 
-  // Logout
   const logout = useCallback(() => {
-    localStorage.removeItem('usemeta_user');
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('beta_admin_token');
     setUser(null);
   }, []);
 
-  // Update profile
   const updateUser = useCallback((updates) => {
     setUser((prev) => {
       const updated = { ...prev, ...updates };
-      localStorage.setItem('usemeta_user', JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

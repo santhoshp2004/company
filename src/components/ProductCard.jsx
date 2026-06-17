@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
  * Product card component used in the Products marketplace page.
  * Displays product image, name, price, rating, and category badge.
  */
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, selected = false, onToggleCompare }) {
   const { id, name, tagline, description, image, price, rating, reviewCount, badge, badgeColor, category, features } = product;
 
   return (
@@ -23,6 +23,18 @@ export default function ProductCard({ product }) {
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900/80 via-transparent to-transparent" />
+
+        {/* Compare toggle */}
+        {onToggleCompare && (
+          <button
+            type="button"
+            onClick={() => onToggleCompare(id)}
+            className={`absolute top-3 right-3 w-10 h-10 rounded-2xl border border-white/15 flex items-center justify-center text-sm font-semibold transition-all duration-300 ${selected ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-white/10 text-white/80 hover:bg-white/20'}`}
+            aria-label={selected ? 'Remove from comparison' : 'Add to comparison'}
+          >
+            {selected ? '✓' : '+'}
+          </button>
+        )}
 
         {/* Badge */}
         {badge && (

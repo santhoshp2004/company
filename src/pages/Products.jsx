@@ -3,6 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { products, categories } from '../data/products';
 import ProductCard from '../components/ProductCard';
 
+const productBenefits = [
+  { title: 'Enterprise-grade reliability', desc: 'Secure SaaS products built for high availability and global operations.' },
+  { title: 'Tailored product categories', desc: 'Find the right solution fast with curated categories and intelligent search.' },
+  { title: 'Premium workflow experience', desc: 'Designed for teams that need clarity, speed, and predictable outcomes.' },
+];
+
 /**
  * Product marketplace page — search, filter, and browse all products.
  */
@@ -11,6 +17,17 @@ export default function Products() {
   const [query, setQuery] = useState(searchParams.get('search') || '');
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+  const toggleCompare = (productId) => {
+    setSelectedProducts((current) =>
+      current.includes(productId)
+        ? current.filter((id) => id !== productId)
+        : [...current, productId].slice(-3)
+    );
+  };
+
+  const clearComparison = () => setSelectedProducts([]);
 
   // Keep search query in sync with URL param (from navbar search)
   useEffect(() => {
@@ -61,8 +78,18 @@ export default function Products() {
             Explore Our <span className="gradient-text">Products</span>
           </h1>
           <p className="mt-4 text-gray-400 max-w-lg mx-auto">
-            Discover intelligent SaaS tools built for modern teams. Find the perfect product for your workflow.
+            Discover software tools and digital platforms built for modern teams. Find the right product for your workflow.
           </p>
+        </div>
+
+        {/* ── Product benefits ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          {productBenefits.map((benefit) => (
+            <div key={benefit.title} className="glass rounded-3xl p-6 border border-white/10 shadow-lg shadow-black/10 transition-all duration-300 hover:-translate-y-1">
+              <h3 className="text-base font-bold text-white mb-2">{benefit.title}</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">{benefit.desc}</p>
+            </div>
+          ))}
         </div>
 
         {/* ── Search & Filter bar ── */}
@@ -101,6 +128,26 @@ export default function Products() {
           </select>
         </div>
 
+        {selectedProducts.length > 1 && (
+          <div className="glass rounded-3xl p-5 mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border border-white/10 shadow-lg shadow-primary-500/10">
+            <div>
+              <p className="text-sm text-primary-400 font-semibold uppercase tracking-[0.24em] mb-2">Product Comparison</p>
+              <p className="text-sm text-gray-300">
+                {selectedProducts.length} products selected. Compare pricing, ratings, and feature highlights side by side.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={clearComparison}
+                className="px-4 py-2 rounded-xl text-sm font-medium glass glass-hover text-white/80 hover:text-white"
+              >
+                Clear selection
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── Category pills ── */}
         <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat) => (
@@ -126,11 +173,67 @@ export default function Products() {
           {query && <span> for "<span className="text-primary-400">{query}</span>"</span>}
         </p>
 
+        {selectedProducts.length > 1 && (
+          <div className="glass rounded-3xl p-6 mb-8 border border-white/10 shadow-lg shadow-primary-500/10">
+            <h2 className="text-lg font-bold text-white mb-4">Compare Selected Products</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-left border-separate border-spacing-0">
+                <thead>
+                  <tr className="text-gray-400 uppercase text-[11px] tracking-[0.24em]">
+                    <th className="py-3 pr-4">Feature</th>
+                    {selectedProducts.map((id) => {
+                      const product = products.find((item) => item.id === id);
+                      return (
+                        <th key={id} className="py-3 px-4 text-white font-semibold">{product?.name}</th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-white/10">
+                    <td className="py-4 pr-4 text-gray-300">Category</td>
+                    {selectedProducts.map((id) => {
+                      const product = products.find((item) => item.id === id);
+                      return <td key={id} className="py-4 px-4 text-white">{product?.category}</td>;
+                    })}
+                  </tr>
+                  <tr className="border-t border-white/10 bg-white/5">
+                    <td className="py-4 pr-4 text-gray-300">Monthly Price</td>
+                    {selectedProducts.map((id) => {
+                      const product = products.find((item) => item.id === id);
+                      return <td key={id} className="py-4 px-4 text-white">${product?.price}</td>;
+                    })}
+                  </tr>
+                  <tr className="border-t border-white/10">
+                    <td className="py-4 pr-4 text-gray-300">Rating</td>
+                    {selectedProducts.map((id) => {
+                      const product = products.find((item) => item.id === id);
+                      return <td key={id} className="py-4 px-4 text-white">{product?.rating} / 5</td>;
+                    })}
+                  </tr>
+                  <tr className="border-t border-white/10 bg-white/5">
+                    <td className="py-4 pr-4 text-gray-300">Top Feature</td>
+                    {selectedProducts.map((id) => {
+                      const product = products.find((item) => item.id === id);
+                      return <td key={id} className="py-4 px-4 text-white">{product?.features[0]}</td>;
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* ── Products grid ── */}
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                selected={selectedProducts.includes(product.id)}
+                onToggleCompare={toggleCompare}
+              />
             ))}
           </div>
         ) : (
