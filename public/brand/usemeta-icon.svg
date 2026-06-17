@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- USEMETA — Icon-only mark (square, all sizes) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-label="USEMETA icon">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#3B82F6"/>
+      <stop offset="55%"  stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <radialGradient id="bg-grad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%"  stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </radialGradient>
+    <filter id="g" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="core-glow">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background with subtle gradient -->
+  <rect width="100" height="100" rx="24" fill="url(#bg-grad)"/>
+
+  <!-- Subtle inner border -->
+  <rect x="1" y="1" width="98" height="98" rx="23"
+        stroke="url(#g1)" stroke-width="1" opacity="0.2" fill="none"/>
+
+  <!-- Outer orbital ring -->
+  <circle cx="50" cy="50" r="36"
+          stroke="url(#g1)" stroke-width="1.8"
+          stroke-dasharray="155 70" stroke-dashoffset="28"
+          stroke-linecap="round" opacity="0.3" filter="url(#g)"/>
+
+  <!-- Rotated orbital ellipse 1 -->
+  <ellipse cx="50" cy="50" rx="36" ry="17"
+           stroke="url(#g1)" stroke-width="1.8"
+           stroke-dasharray="125 90" stroke-dashoffset="-8"
+           stroke-linecap="round" opacity="0.55"
+           transform="rotate(-35 50 50)" filter="url(#g)"/>
+
+  <!-- Rotated orbital ellipse 2 -->
+  <ellipse cx="50" cy="50" rx="36" ry="17"
+           stroke="url(#g1)" stroke-width="1.8"
+           stroke-dasharray="110 110" stroke-dashoffset="18"
+           stroke-linecap="round" opacity="0.55"
+           transform="rotate(35 50 50)" filter="url(#g)"/>
+
+  <!-- S-curve (Santhosh tribute, disguised as connectivity arc) -->
+  <path d="M 57 25
+           C 67 25, 73 33, 66 40
+           C 59 47, 41 45, 34 52
+           C 27 59, 33 70, 44 72"
+        stroke="url(#g1)" stroke-width="3" stroke-linecap="round"
+        fill="none" filter="url(#g)" opacity="0.9"/>
+
+  <!-- Core nucleus -->
+  <circle cx="50" cy="50" r="6" fill="url(#g1)" filter="url(#core-glow)"/>
+  <circle cx="50" cy="50" r="3" fill="white" opacity="0.9"/>
+
+  <!-- Three orbital nodes -->
+  <circle cx="50" cy="15.5" r="3.8" fill="#3B82F6" opacity="0.95" filter="url(#g)"/>
+  <circle cx="74" cy="64"   r="3.8" fill="#8B5CF6" opacity="0.95" filter="url(#g)"/>
+  <circle cx="26" cy="64"   r="3.8" fill="#06B6D4" opacity="0.95" filter="url(#g)"/>
+
+  <!-- Thin spokes: nucleus → nodes -->
+  <line x1="50" y1="44" x2="50" y2="19.3"
+        stroke="url(#g1)" stroke-width="1.2" opacity="0.35"/>
+  <line x1="55" y1="54" x2="71" y2="62"
+        stroke="url(#g1)" stroke-width="1.2" opacity="0.35"/>
+  <line x1="45" y1="54" x2="29" y2="62"
+        stroke="url(#g1)" stroke-width="1.2" opacity="0.35"/>
+</svg>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" fill="none" role="img" aria-label="USEMETA logo">
+  <defs>
+    <!-- Primary gradient: Electric Blue → Violet -->
+    <linearGradient id="grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#3B82F6"/>
+      <stop offset="55%"  stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Inner icon glow -->
+    <filter id="icon-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle drop shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#3B82F6" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Clip for icon boundary -->
+    <clipPath id="icon-clip">
+      <rect x="0" y="0" width="100" height="100" rx="22"/>
+    </clipPath>
+  </defs>
+
+  <!-- ═══════════════════════════════════════
+       ICON MARK  (0,0 → 100,100)
+       Concept: Abstract "meta-node" structure —
+       three connected orbital arcs forming an
+       interlocked shape. The top arc subtly
+       encodes an "S" curve (Santhosh tribute).
+  ════════════════════════════════════════ -->
+
+  <!-- Icon background tile -->
+  <rect x="0" y="0" width="100" height="100" rx="22"
+        fill="#0F172A" filter="url(#shadow)"/>
+
+  <!-- Outer ring — full circle, partial stroke -->
+  <circle cx="50" cy="50" r="35"
+          stroke="url(#grad-primary)" stroke-width="1.5"
+          stroke-dasharray="160 60" stroke-dashoffset="30"
+          stroke-linecap="round" opacity="0.35"
+          filter="url(#glow)"/>
+
+  <!-- Middle orbital arc (tilted ellipse) -->
+  <ellipse cx="50" cy="50" rx="35" ry="18"
+           stroke="url(#grad-primary)" stroke-width="1.5"
+           stroke-dasharray="130 80" stroke-dashoffset="-10"
+           stroke-linecap="round" opacity="0.5"
+           transform="rotate(-35 50 50)"
+           filter="url(#glow)"/>
+
+  <!-- Inner orbital arc (opposite tilt) -->
+  <ellipse cx="50" cy="50" rx="35" ry="18"
+           stroke="url(#grad-primary)" stroke-width="1.5"
+           stroke-dasharray="110 100" stroke-dashoffset="20"
+           stroke-linecap="round" opacity="0.5"
+           transform="rotate(35 50 50)"
+           filter="url(#glow)"/>
+
+  <!-- "S" curve — Santhosh tribute (subtle, top-right quadrant) -->
+  <!-- Reads as a flowing connectivity line, secretly traces an S -->
+  <path d="M 56 26
+           C 65 26, 70 32, 64 38
+           C 58 44, 42 44, 36 50
+           C 30 56, 35 68, 44 70"
+        stroke="url(#grad-primary)" stroke-width="2.8"
+        stroke-linecap="round" fill="none"
+        filter="url(#icon-glow)" opacity="0.95"/>
+
+  <!-- Core node — centre dot -->
+  <circle cx="50" cy="50" r="5.5" fill="url(#grad-primary)" filter="url(#icon-glow)"/>
+
+  <!-- Satellite nodes — 3 orbital intersection points -->
+  <!-- Top node -->
+  <circle cx="50" cy="17" r="3.2" fill="#3B82F6" opacity="0.9" filter="url(#glow)"/>
+  <!-- Bottom-right node -->
+  <circle cx="73" cy="63" r="3.2" fill="#8B5CF6" opacity="0.9" filter="url(#glow)"/>
+  <!-- Bottom-left node -->
+  <circle cx="27" cy="63" r="3.2" fill="#06B6D4" opacity="0.9" filter="url(#glow)"/>
+
+  <!-- Connector lines: core → satellites (thin, elegant) -->
+  <line x1="50" y1="44.5" x2="50" y2="20.2"
+        stroke="url(#grad-primary)" stroke-width="1" opacity="0.4"/>
+  <line x1="54.5" y1="53" x2="70" y2="61"
+        stroke="url(#grad-primary)" stroke-width="1" opacity="0.4"/>
+  <line x1="45.5" y1="53" x2="30" y2="61"
+        stroke="url(#grad-primary)" stroke-width="1" opacity="0.4"/>
+
+  <!-- ═══════════════════════════════════════
+       WORDMARK  — starts at x=116
+  ════════════════════════════════════════ -->
+
+  <!-- USEMETA — custom geometric letterforms via paths -->
+  <!-- Each letter is hand-crafted as a path for maximum brand control -->
+
+  <!-- U -->
+  <path d="M 116 28 L 116 58 Q 116 72 128 72 Q 140 72 140 58 L 140 28"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- S (deliberately echoes the icon S curve) -->
+  <path d="M 166 36 C 160 30, 148 30, 148 42 C 148 50, 160 52, 164 58
+           C 168 64, 162 72, 152 72 C 146 72, 142 69, 140 66"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none" transform="translate(10,0)"/>
+
+  <!-- E -->
+  <path d="M 186 28 L 186 72 M 186 28 L 206 28 M 186 50 L 202 50 M 186 72 L 206 72"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- M -->
+  <path d="M 214 72 L 214 28 L 228 58 L 242 28 L 242 72"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- E -->
+  <path d="M 252 28 L 252 72 M 252 28 L 272 28 M 252 50 L 268 50 M 252 72 L 272 72"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- T -->
+  <path d="M 280 28 L 306 28 M 293 28 L 293 72"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- A -->
+  <path d="M 314 72 L 328 28 L 342 72 M 319 56 L 337 56"
+        stroke="white" stroke-width="5.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- Gradient accent underline beneath wordmark -->
+  <rect x="116" y="78" width="226" height="3" rx="1.5"
+        fill="url(#grad-primary)" opacity="0.7"/>
+
+  <!-- Tagline (optional — small, below underline) -->
+  <text x="116" y="95" font-family="system-ui, -apple-system, sans-serif"
+        font-size="9.5" font-weight="500" letter-spacing="3.2"
+        fill="#94A3B8" opacity="0.8">
+    TRANSFORM IDEAS INTO DIGITAL REALITY
+  </text>
+</svg>
