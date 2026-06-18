@@ -1,67 +1,89 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api } from '../utils/api';
+
+// Pure localStorage auth — no backend required.
+// To migrate to an API later, replace the localStorage calls
+// in login/logout/register with fetch() calls to your server.
 
 const AuthContext = createContext(null);
-
-const STORAGE_KEY = 'beta_admin_session';
+const USER_KEY  = 'nexus_user';
+const CREDS_KEY = 'nexus_credentials';
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Rehydrate session from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(USER_KEY);
     if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+      try { setUser(JSON.parse(stored)); }
+      catch { localStorage.removeItem(USER_KEY); }
     }
     setLoading(false);
   }, []);
 
-  const persistSession = useCallback((session) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    if (session.token) localStorage.setItem('beta_admin_token', session.token);
-    setUser(session);
+  // Register a new user
+  const register = useCallback(({ name, email, password }) => {
+    const newUser = {
+      id:       Date.now(),
+      name,
+      email,
+      avatar:   name.charAt(0).toUpperCase(),
+      joinedAt: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      plan:     'Free',
+    };
+    localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    const creds = JSON.parse(localStorage.getItem(CREDS_KEY) || '[]');
+    creds.push({ email, password });
+    localStorage.setItem(CREDS_KEY, JSON.stringify(creds));
+    setUser(newUser);
+    return { success: true };
   }, []);
 
-  const login = useCallback(async ({ email, password }) => {
-    try {
-      const response = await api.login({ email, password });
-      if (response?.token) {
-        persistSession({
-          id: response.user._id,
-          name: response.user.name,
-          email: response.user.email,
-          role: response.user.role,
-          token: response.token,
-        });
-        return { success: true };
-      }
-      return { success: false, error: 'Invalid credentials.' };
-    } catch (error) {
-      return { success: false, error: error.message || 'Authentication failed.' };
-    }
-  }, [persistSession]);
+  // Sign in
+  const login = useCallback(({ email, password }) => {
+    const creds = JSON.parse(localStorage.getItem(CREDS_KEY) || '[]');
+    const match = creds.find(c => c.email === email && c.password === password);
+    if (!match) return { success: false, error: 'Invalid email or password.' };
 
+    const stored = localStorage.getItem(USER_KEY);
+    if (stored) {
+      try {
+        const u = JSON.parse(stored);
+        if (u.email === email) { setUser(u); return { success: true }; }
+      } catch { /* fall through */ }
+    }
+    // Fallback: build a minimal session
+    const u = {
+      id:       Date.now(),
+      name:     email.split('@')[0],
+      email,
+      avatar:   email.charAt(0).toUpperCase(),
+      joinedAt: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      plan:     'Free',
+    };
+    localStorage.setItem(USER_KEY, JSON.stringify(u));
+    setUser(u);
+    return { success: true };
+  }, []);
+
+  // Sign out
   const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('beta_admin_token');
+    localStorage.removeItem(USER_KEY);
     setUser(null);
   }, []);
 
+  // Update profile fields
   const updateUser = useCallback((updates) => {
-    setUser((prev) => {
+    setUser(prev => {
       const updated = { ...prev, ...updates };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(USER_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, register, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

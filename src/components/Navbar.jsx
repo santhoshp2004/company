@@ -1,187 +1,269 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Search, ChevronDown, ChevronUp, Menu, X,
+  LogOut, LayoutDashboard, User, Shield,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import Logo from './Logo';
-import SearchBar from './SearchBar';
+import MegaMenu from './MegaMenu';
+import MobileMenu from './MobileMenu';
 
-/* ─── Product catalogue data ─── */
-const PRODUCT_CATEGORIES = [
-  {
-    key: 'business',
-    label: 'Business',
-    icon: '🏢',
-    color: 'from-blue-500 to-indigo-600',
-    products: [
-      { name: 'Beta ERP', badge: 'ERP', desc: 'Integrated enterprise resource planning with inventory, procurement and finance.', icon: '🏭' },
-      { name: 'Beta CRM', badge: 'CRM', desc: 'Manage leads, sales pipelines and customer relationships end-to-end.', icon: '🤝' },
-      { name: 'Beta Inventory', badge: 'INV', desc: 'Real-time stock tracking, warehouse management and procurement automation.', icon: '📦' },
-      { name: 'Beta HRMS', badge: 'HR', desc: 'Complete HR — payroll, attendance, leave, performance and onboarding.', icon: '👥' },
-    ],
-  },
-  {
-    key: 'finance',
-    label: 'Finance',
-    icon: '💰',
-    color: 'from-emerald-500 to-teal-600',
-    products: [
-      { name: 'Beta Accounts', badge: 'ACC', desc: 'Double-entry accounting, ledgers, P&L and balance sheet reporting.', icon: '📊' },
-      { name: 'Beta Payroll', badge: 'PAY', desc: 'Automated salary processing, tax computation and payslip generation.', icon: '💳' },
-      { name: 'Beta Billing', badge: 'BIL', desc: 'GST-compliant invoicing, payment tracking and reconciliation.', icon: '🧾' },
-      { name: 'Beta Audit', badge: 'AUD', desc: 'Financial audit trails, compliance reporting and internal controls.', icon: '🔍' },
-    ],
-  },
-  {
-    key: 'education',
-    label: 'Education',
-    icon: '🎓',
-    color: 'from-violet-500 to-purple-600',
-    products: [
-      { name: 'Beta School ERP', badge: 'SCH', desc: 'Complete school administration — admissions, attendance and exams.', icon: '🏫' },
-      { name: 'Beta LMS', badge: 'LMS', desc: 'Online learning platform with courses, assessments and certificates.', icon: '📚' },
-      { name: 'Beta Fee Manager', badge: 'FEE', desc: 'Fee collection, receipts, reminders and financial reporting for institutions.', icon: '🏦' },
-      { name: 'Beta Parent Portal', badge: 'PAR', desc: 'Real-time parent–school communication, progress tracking and alerts.', icon: '📱' },
-    ],
-  },
-  {
-    key: 'healthcare',
-    label: 'Healthcare',
-    icon: '🏥',
-    color: 'from-rose-500 to-pink-600',
-    products: [
-      { name: 'Beta HMS', badge: 'HMS', desc: 'Hospital management — patient records, appointments and billing.', icon: '🏨' },
-      { name: 'Beta Clinic', badge: 'CLI', desc: 'Clinic scheduling, e-prescriptions, and patient health history.', icon: '💊' },
-      { name: 'Beta Lab', badge: 'LAB', desc: 'Laboratory information system with sample tracking and reports.', icon: '🔬' },
-      { name: 'Beta Pharmacy', badge: 'PHA', desc: 'Medicine inventory, dispensing and supplier purchase management.', icon: '💉' },
-    ],
-  },
-];
+/* ─── Design tokens ─── */
+const NAV_BG       = '#DCFCE7';   // light green header
+const NAV_BORDER   = '#bbf7d0';   // green-200
+const SCROLL_BG    = '#ffffff';   // white after scroll
+const PILL_BG      = '#3B82F6';   // active blue pill
+const PILL_TEXT    = '#ffffff';   // active pill text
+const DARK_TEXT    = '#14532D';   // green-900 text on green bg
+const IDLE_TEXT    = '#374151';   // slate-700 on white bg
 
-/* ─── Direct nav links (no dropdown) ─── */
+/* ─── Nav order: Products ▼ · Careers · Partners · About · Support ─── */
 const DIRECT_LINKS = [
-  { to: '/partners', label: 'Partners' },
   { to: '/careers',  label: 'Careers'  },
-  { to: '/about',    label: 'About'    },
+  { to: '/partners', label: 'Partners' },
+  { to: '/about',    label: 'About Us' },
   { to: '/support',  label: 'Support'  },
 ];
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const { theme } = useTheme();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const isLight   = theme === THEMES.VISION;
+  const { user, logout }   = useAuth();
+  const navigate           = useNavigate();
+  const location           = useLocation();
 
-  const [scrolled,    setScrolled]    = useState(false);
-  const [showProducts, setShowProducts] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('business');
-  const [mobileOpen,  setMobileOpen]  = useState(false);
-  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [scrolled,     setScrolled]    = useState(false);
+  const [megaOpen,     setMegaOpen]    = useState(false);
+  const [mobileOpen,   setMobileOpen]  = useState(false);
+  const [profileOpen,  setProfileOpen] = useState(false);
+  const [searchActive, setSearchActive]= useState(false);
+  const [searchVal,    setSearchVal]   = useState('');
+
+  const megaWrapRef = useRef(null);
   const profileRef  = useRef(null);
-  const productsRef = useRef(null);
+  const searchRef   = useRef(null);
 
+  /* scroll shadow */
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10);
+    const fn = () => setScrolled(window.scrollY > 6);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
+  /* outside click */
   useEffect(() => {
     const fn = (e) => {
-      if (profileRef.current  && !profileRef.current.contains(e.target))  setProfileOpen(false);
-      if (productsRef.current && !productsRef.current.contains(e.target)) setShowProducts(false);
+      if (megaWrapRef.current  && !megaWrapRef.current.contains(e.target))  setMegaOpen(false);
+      if (profileRef.current   && !profileRef.current.contains(e.target))   setProfileOpen(false);
+      if (searchRef.current    && !searchRef.current.contains(e.target))     setSearchActive(false);
     };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
+  /* Escape */
   useEffect(() => {
-    const fn = (e) => { if (e.key === 'Escape') { setShowProducts(false); setProfileOpen(false); } };
+    const fn = (e) => {
+      if (e.key === 'Escape') {
+        setMegaOpen(false); setProfileOpen(false);
+        setSearchActive(false); setMobileOpen(false);
+      }
+    };
     document.addEventListener('keydown', fn);
     return () => document.removeEventListener('keydown', fn);
   }, []);
 
-  // Close dropdown and mobile menu on route change
-  useEffect(() => { setShowProducts(false); setMobileOpen(false); }, [location.pathname]);
+  /* route change → close all */
+  useEffect(() => {
+    setMegaOpen(false); setMobileOpen(false);
+    setProfileOpen(false); setSearchActive(false);
+  }, [location.pathname]);
 
-  function handleLogout() { logout(); setProfileOpen(false); navigate('/'); }
+  /* body scroll lock */
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
-  /* ─── Shared style tokens ─── */
+  const handleLogout = useCallback(() => {
+    logout(); setProfileOpen(false); navigate('/');
+  }, [logout, navigate]);
+
   const isProductsActive = location.pathname.startsWith('/products');
-  const navBg = scrolled
-    ? isLight ? 'bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm'
-               : 'bg-[#09091a]/95 backdrop-blur-xl border-b border-white/8 shadow-2xl shadow-black/50'
-    : isLight ? 'bg-white/80 backdrop-blur-md'
-               : 'bg-transparent';
 
-  const linkCls = (active) => [
-    'relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
-    active
-      ? isLight ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/10'
-      : isLight ? 'text-slate-600 hover:text-blue-600 hover:bg-blue-50/70'
-               : 'text-gray-300 hover:text-white hover:bg-white/8',
-  ].join(' ');
+  /* ── Computed styles ── */
+  const headerBg     = scrolled ? SCROLL_BG : NAV_BG;
+  const headerBorder = scrolled ? '#e5e7eb' : NAV_BORDER;
+  const headerShadow = scrolled
+    ? '0 2px 20px rgba(0,0,0,0.08)'
+    : '0 2px 10px rgba(22,163,74,0.12)';
+  const baseText = scrolled ? IDLE_TEXT : DARK_TEXT;
 
-  const activeCat = PRODUCT_CATEGORIES.find(c => c.key === activeCategory);
+  /* ── Active pill (blue) vs idle link style ── */
+  const pillStyle = {
+    backgroundColor: PILL_BG,
+    color: PILL_TEXT,
+    borderRadius: 9999,
+    padding: '8px 16px',
+    fontWeight: 700,
+    fontSize: 14,
+    transition: 'all 300ms',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+  };
+  const idleStyle = (hovered) => ({
+    backgroundColor: hovered ? 'rgba(59,130,246,0.08)' : 'transparent',
+    color: baseText,
+    borderRadius: 9999,
+    padding: '8px 16px',
+    fontWeight: 600,
+    fontSize: 14,
+    transition: 'all 300ms',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+  });
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navBg}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[62px]">
+    <>
+      {/* ════════════════════════
+          HEADER
+      ════════════════════════ */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        style={{
+          backgroundColor: headerBg,
+          borderBottom: `1px solid ${headerBorder}`,
+          boxShadow: headerShadow,
+          height: 80,
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center gap-4">
 
-          {/* LEFT — Logo */}
-          <Logo />
+          {/* Logo */}
+          <div className="flex-shrink-0 mr-2">
+            <Logo />
+          </div>
 
-          {/* CENTER — Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-0.5">
-            {/* Products with dropdown */}
-            <div ref={productsRef} className="relative">
-              <button
-                type="button"
-                onMouseEnter={() => setShowProducts(true)}
-                onClick={() => setShowProducts(p => !p)}
-                className={`${linkCls(isProductsActive || showProducts)} inline-flex items-center gap-1.5`}
-                aria-haspopup="true"
-                aria-expanded={showProducts}
-              >
-                Products
-                <motion.svg
-                  animate={{ rotate: showProducts ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="w-3.5 h-3.5 opacity-70"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-                </motion.svg>
-              </button>
+          {/* ── Centered pill nav container ── */}
+          <div className="hidden lg:flex flex-1 justify-center">
+            <div
+              className="flex items-center gap-1 px-3 py-2"
+              style={{
+                backgroundColor: scrolled ? '#F3F4F6' : 'rgba(255,255,255,0.55)',
+                borderRadius: 50,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: scrolled ? '1px solid #e5e7eb' : '1px solid rgba(255,255,255,0.7)',
+              }}
+            >
+              {/* ── Products button (only one with dropdown arrow) ── */}
+              <div ref={megaWrapRef} className="relative">
+                <button
+                  type="button"
+                  onMouseEnter={() => setMegaOpen(true)}
+                  onClick={() => setMegaOpen(p => !p)}
+                  aria-haspopup="true"
+                  aria-expanded={megaOpen}
+                  style={isProductsActive || megaOpen ? pillStyle : idleStyle(megaOpen)}
+                >
+                  Products
+                  {megaOpen
+                    ? <ChevronUp size={14} className="flex-shrink-0" />
+                    : <ChevronDown size={14} className="flex-shrink-0" />
+                  }
+                </button>
+              </div>
+
+              {/* Direct links — blue pill when active */}
+              {DIRECT_LINKS.map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  style={({ isActive }) => isActive ? pillStyle : idleStyle(false)}
+                  className="whitespace-nowrap"
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Right: search + auth ── */}
+          <div className="hidden lg:flex items-center gap-2.5 ml-2">
+
+            {/* Expandable search */}
+            <div ref={searchRef} className="relative">
+              <AnimatePresence mode="wait">
+                {searchActive ? (
+                  <motion.div
+                    key="open"
+                    initial={{ width: 38, opacity: 0.4 }}
+                    animate={{ width: 220, opacity: 1 }}
+                    exit={{ width: 38, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full border bg-white"
+                    style={{ borderColor: '#3B82F6', boxShadow: '0 0 0 3px rgba(59,130,246,0.12)' }}
+                  >
+                    <Search size={15} className="text-blue-500 flex-shrink-0" />
+                    <input
+                      autoFocus
+                      type="text"
+                      value={searchVal}
+                      onChange={e => setSearchVal(e.target.value)}
+                      placeholder="Search products…"
+                      className="text-sm text-slate-700 placeholder-slate-400 outline-none bg-transparent flex-1"
+                    />
+                    {searchVal && (
+                      <button onClick={() => setSearchVal('')}>
+                        <X size={13} className="text-slate-400 hover:text-slate-600" />
+                      </button>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="closed"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setSearchActive(true)}
+                    aria-label="Search"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-200 hover:bg-blue-50 hover:border-blue-300"
+                    style={{
+                      borderColor: scrolled ? '#e5e7eb' : NAV_BORDER,
+                      backgroundColor: scrolled ? '#fff' : 'rgba(255,255,255,0.5)',
+                      color: scrolled ? '#6b7280' : '#15803D',
+                    }}
+                  >
+                    <Search size={16} />
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Direct links — no dropdown arrow */}
-            {DIRECT_LINKS.map(({ to, label }) => (
-              <NavLink key={to} to={to}
-                className={({ isActive }) => linkCls(isActive)}>
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* RIGHT — Search + Auth */}
-          <div className="hidden lg:flex items-center gap-2">
-            <SearchBar />
+            {/* Profile or Sign In */}
             {user ? (
               <div className="relative" ref={profileRef}>
-                <button onClick={() => setProfileOpen(p => !p)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer
-                    ${isLight ? 'bg-slate-50 border-slate-200 hover:border-blue-300' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                    style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>{user.avatar}</div>
-                  <span className={`text-sm font-medium ${isLight ? 'text-slate-700' : 'text-white'}`}>{user.name}</span>
-                  <svg className={`w-3 h-3 transition-transform ${profileOpen ? 'rotate-180' : ''} ${isLight ? 'text-slate-400' : 'text-gray-400'}`}
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-                  </svg>
+                <button
+                  onClick={() => setProfileOpen(p => !p)}
+                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border transition-all duration-200 hover:shadow-md"
+                  style={{
+                    borderColor: scrolled ? '#e5e7eb' : NAV_BORDER,
+                    backgroundColor: scrolled ? '#fff' : 'rgba(255,255,255,0.6)',
+                    color: baseText,
+                  }}
+                >
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#0052CC,#3B82F6)' }}
+                  >{user.avatar}</div>
+                  <span className="text-sm font-semibold max-w-[90px] truncate">{user.name}</span>
+                  <motion.div animate={{ rotate: profileOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown size={13} className="opacity-60" />
+                  </motion.div>
                 </button>
+
                 <AnimatePresence>
                   {profileOpen && (
                     <motion.div
@@ -189,25 +271,32 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -6, scale: 0.96 }}
                       transition={{ duration: 0.18 }}
-                      className={`absolute top-full right-0 mt-2 w-48 rounded-2xl overflow-hidden z-50
-                        ${isLight ? 'bg-white border border-slate-200 shadow-xl' : 'bg-[#0f0f28] border border-white/10 shadow-2xl'}`}>
-                      <div className={`px-4 py-3 border-b ${isLight ? 'border-slate-100' : 'border-white/8'}`}>
-                        <p className={`text-sm font-semibold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>{user.name}</p>
-                        <p className={`text-xs truncate ${isLight ? 'text-slate-400' : 'text-gray-500'}`}>{user.email}</p>
+                      className="absolute top-full right-0 mt-2 w-52 rounded-2xl overflow-hidden z-50"
+                      style={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
+                      }}
+                    >
+                      <div className="px-4 py-3" style={{ borderBottom: '1px solid #f3f4f6' }}>
+                        <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
+                        <p className="text-xs text-slate-400 truncate">{user.email}</p>
                       </div>
-                      <div className="py-1">
-                        {[{ to: '/profile', label: 'Profile' }, { to: '/dashboard', label: 'Dashboard' }].map(({ to, label }) => (
+                      <div className="py-1.5">
+                        {[
+                          { to: '/profile',   Icon: User,             label: 'Profile'   },
+                          { to: '/dashboard', Icon: LayoutDashboard,  label: 'Dashboard' },
+                        ].map(({ to, Icon, label }) => (
                           <Link key={to} to={to} onClick={() => setProfileOpen(false)}
-                            className={`flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
-                              ${isLight ? 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' : 'text-gray-300 hover:text-white hover:bg-white/8'}`}>
-                            {label}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-colors">
+                            <Icon size={14} className="text-slate-400" /> {label}
                           </Link>
                         ))}
                       </div>
-                      <div className={`border-t py-1 ${isLight ? 'border-slate-100' : 'border-white/8'}`}>
+                      <div className="py-1.5" style={{ borderTop: '1px solid #f3f4f6' }}>
                         <button onClick={handleLogout}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                          Sign Out
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                          <LogOut size={14} /> Sign Out
                         </button>
                       </div>
                     </motion.div>
@@ -216,224 +305,130 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link to="/login" className={`px-4 py-2 text-sm font-medium rounded-xl transition-all
-                  ${isLight ? 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' : 'text-gray-300 hover:text-white hover:bg-white/8'}`}>
-                  Sign In
+                {/* Admin Login button */}
+                <Link
+                  to="/admin/login"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(135deg,#1e3a5f,#1d4ed8)',
+                    boxShadow: '0 4px 14px rgba(29,78,216,0.35)',
+                  }}
+                  title="Admin Portal"
+                >
+                  <Shield size={14} className="flex-shrink-0" />
+                  Admin Login
                 </Link>
-                <Link to="/register" className="px-4 py-2 text-sm font-semibold text-white rounded-xl hover:-translate-y-0.5 transition-all"
-                  style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)', boxShadow: '0 4px 14px rgba(59,130,246,0.35)' }}>
-                  Register
+
+                {/* User Sign In button */}
+                <Link
+                  to="/login"
+                  className="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+                  style={{
+                    background: 'linear-gradient(135deg,#0052CC,#0066FF)',
+                    color: '#fff',
+                    boxShadow: '0 4px 14px rgba(0,82,204,0.32)',
+                  }}
+                >
+                  Sign In
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile hamburger */}
-          <button onClick={() => setMobileOpen(p => !p)}
-            className={`lg:hidden p-2 rounded-xl transition-all ${isLight ? 'bg-slate-100 hover:bg-slate-200' : 'bg-white/8 hover:bg-white/15'}`}
-            aria-label="Toggle menu">
-            <div className="w-5 h-4 flex flex-col justify-between">
-              {[mobileOpen ? 'rotate-45 translate-y-1.5' : '', mobileOpen ? 'opacity-0' : 'w-full', mobileOpen ? '-rotate-45 -translate-y-2' : ''].map((cls, i) => (
-                <span key={i} className={`block h-0.5 rounded-full transition-all duration-300 ${cls} ${isLight ? 'bg-slate-700' : 'bg-white'}`}/>
-              ))}
-            </div>
-          </button>
+          {/* ── Mobile buttons ── */}
+          <div className="flex lg:hidden items-center gap-2 ml-auto">
+            <button
+              onClick={() => setSearchActive(p => !p)}
+              aria-label="Search"
+              className="w-9 h-9 flex items-center justify-center rounded-full border transition-colors hover:bg-green-100"
+              style={{ borderColor: NAV_BORDER, color: '#15803D', backgroundColor: 'rgba(255,255,255,0.5)' }}
+            >
+              <Search size={16} />
+            </button>
+            <button
+              onClick={() => setMobileOpen(p => !p)}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              className="w-9 h-9 flex items-center justify-center rounded-full border transition-colors hover:bg-green-100"
+              style={{ borderColor: NAV_BORDER, color: '#15803D', backgroundColor: 'rgba(255,255,255,0.5)' }}
+            >
+              <AnimatePresence mode="wait">
+                {mobileOpen
+                  ? <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}><X size={18} /></motion.div>
+                  : <motion.div key="m" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}><Menu size={18} /></motion.div>
+                }
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* ── PRODUCTS MEGA MENU (desktop) ── */}
-      <AnimatePresence>
-        {showProducts && (
-          <motion.div
-            onMouseLeave={() => setShowProducts(false)}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`hidden lg:block absolute top-full left-0 right-0 z-40 border-b
-              ${isLight ? 'bg-white border-slate-200 shadow-2xl shadow-black/8' : 'bg-[#0a0a1f] border-white/8 shadow-2xl shadow-black/60'}`}
-          >
-            <div className="max-w-7xl mx-auto flex" style={{ minHeight: 360 }}>
-              {/* Category sidebar */}
-              <div className={`w-52 flex-shrink-0 py-6 border-r ${isLight ? 'border-slate-100 bg-slate-50/60' : 'border-white/6 bg-white/2'}`}>
-                <p className={`px-5 pb-3 text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
-                  Categories
-                </p>
-                {PRODUCT_CATEGORIES.map((cat) => (
-                  <button key={cat.key} type="button"
-                    onMouseEnter={() => setActiveCategory(cat.key)}
-                    onClick={() => setActiveCategory(cat.key)}
-                    className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-all duration-150 text-left
-                      ${activeCategory === cat.key
-                        ? isLight ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500' : 'bg-blue-500/12 text-blue-300 border-r-2 border-blue-400'
-                        : isLight ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
-                    <span className="text-base">{cat.icon}</span>
-                    {cat.label}
-                    {activeCategory === cat.key && (
-                      <svg className="w-3.5 h-3.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/>
-                      </svg>
-                    )}
-                  </button>
-                ))}
-                <div className={`mx-4 mt-4 pt-4 border-t ${isLight ? 'border-slate-200' : 'border-white/8'}`}>
-                  <Link to="/products"
-                    onClick={() => setShowProducts(false)}
-                    className="flex items-center gap-2 text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors">
-                    All Products →
-                  </Link>
+        {/* Mobile search bar */}
+        <AnimatePresence>
+          {searchActive && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="lg:hidden overflow-hidden"
+              style={{ backgroundColor: '#fff', borderTop: `1px solid ${NAV_BORDER}` }}
+            >
+              <div className="px-4 py-3">
+                <div
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-full border"
+                  style={{ backgroundColor: '#F0FDF4', borderColor: '#bbf7d0' }}
+                >
+                  <Search size={15} style={{ color: '#16A34A' }} className="flex-shrink-0" />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={searchVal}
+                    onChange={e => setSearchVal(e.target.value)}
+                    placeholder="Search products…"
+                    className="text-sm text-slate-700 placeholder-slate-400 outline-none bg-transparent flex-1"
+                  />
+                  {searchVal && (
+                    <button onClick={() => setSearchVal('')}>
+                      <X size={13} className="text-slate-400" />
+                    </button>
+                  )}
                 </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-              {/* Product grid */}
-              <div className="flex-1 py-6 px-6">
-                <AnimatePresence mode="wait">
-                  {activeCat && (
-                    <motion.div key={activeCat.key}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.18 }}>
-                      <p className={`text-[10px] font-bold tracking-[0.3em] uppercase mb-4 ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
-                        {activeCat.label} Solutions
-                      </p>
-                      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-                        {activeCat.products.map((prod, i) => (
-                          <motion.div key={prod.name}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}>
-                            <Link to="/products"
-                              onClick={() => setShowProducts(false)}
-                              className={`group flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg
-                                ${isLight
-                                  ? 'bg-white border-slate-200/80 hover:border-blue-200 hover:shadow-blue-100/50'
-                                  : 'bg-white/4 border-white/8 hover:border-blue-500/30 hover:bg-white/8'}`}>
-                              <div className="flex items-start justify-between">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-gradient-to-br ${activeCat.color} bg-opacity-10`}
-                                  style={{ background: `linear-gradient(135deg,${getGradColor(activeCat.color)})` }}>
-                                  <span>{prod.icon}</span>
-                                </div>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wider
-                                  ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-white/10 text-gray-400'}`}>
-                                  {prod.badge}
-                                </span>
-                              </div>
-                              <div>
-                                <p className={`text-sm font-bold mb-1 group-hover:text-blue-500 transition-colors ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                                  {prod.name}
-                                </p>
-                                <p className={`text-xs leading-relaxed line-clamp-2 ${isLight ? 'text-slate-500' : 'text-gray-400'}`}>
-                                  {prod.desc}
-                                </p>
-                              </div>
-                              <span className={`text-xs font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all -translate-y-1 group-hover:translate-y-0
-                                ${isLight ? 'text-blue-600' : 'text-blue-400'}`}>
-                                Learn more
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                </svg>
-                              </span>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+        {/* ── Mega Menu ── */}
+        <AnimatePresence>
+          {megaOpen && (
+            <div
+              onMouseEnter={() => setMegaOpen(true)}
+              onMouseLeave={() => setMegaOpen(false)}
+              className="hidden lg:block"
+            >
+              <MegaMenu onClose={() => setMegaOpen(false)} />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </header>
 
-      {/* ── MOBILE MENU ── */}
+      {/* ── Mobile drawer + backdrop ── */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.28 }}
-            className={`lg:hidden border-t overflow-hidden ${isLight ? 'bg-white border-slate-200' : 'bg-[#0a0a1f] border-white/8'}`}>
-            <div className="px-4 py-4 space-y-1.5">
-              {/* Products accordion */}
-              <button type="button" onClick={() => setMobileProductsOpen(p => !p)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all
-                  ${isLight ? 'bg-slate-50 text-slate-700 hover:bg-slate-100' : 'bg-white/6 text-gray-200 hover:bg-white/10'}`}>
-                Products
-                <svg className={`w-4 h-4 transition-transform ${mobileProductsOpen ? 'rotate-180' : ''}`}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
-              {mobileProductsOpen && (
-                <div className="pl-2 space-y-1">
-                  {PRODUCT_CATEGORIES.map(cat => (
-                    <div key={cat.key}>
-                      <p className={`px-4 py-1.5 text-xs font-bold tracking-wider uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
-                        {cat.icon} {cat.label}
-                      </p>
-                      {cat.products.map(prod => (
-                        <Link key={prod.name} to="/products"
-                          onClick={() => setMobileOpen(false)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all
-                            ${isLight ? 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:text-white hover:bg-white/8'}`}>
-                          <span>{prod.icon}</span>{prod.name}
-                        </Link>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Direct links */}
-              {DIRECT_LINKS.map(({ to, label }) => (
-                <NavLink key={to} to={to} onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) => `block px-4 py-3 rounded-xl text-sm font-semibold transition-all
-                    ${isActive
-                      ? isLight ? 'bg-blue-50 text-blue-700' : 'bg-white/10 text-white'
-                      : isLight ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' : 'text-gray-300 hover:bg-white/8 hover:text-white'}`}>
-                  {label}
-                </NavLink>
-              ))}
-
-              <div className={`pt-3 border-t ${isLight ? 'border-slate-100' : 'border-white/8'} space-y-2`}>
-                <SearchBar className="w-full"/>
-                {user ? (
-                  <>
-                    <Link to="/profile" onClick={() => setMobileOpen(false)}
-                      className={`block px-4 py-2.5 rounded-xl text-sm ${isLight ? 'bg-slate-50 text-slate-700' : 'bg-white/5 text-gray-200'}`}>Profile</Link>
-                    <Link to="/dashboard" onClick={() => setMobileOpen(false)}
-                      className={`block px-4 py-2.5 rounded-xl text-sm ${isLight ? 'bg-slate-50 text-slate-700' : 'bg-white/5 text-gray-200'}`}>Dashboard</Link>
-                    <button onClick={() => { handleLogout(); setMobileOpen(false); }}
-                      className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-red-500 bg-red-50/40">Sign Out</button>
-                  </>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link to="/login" onClick={() => setMobileOpen(false)}
-                      className={`text-center px-4 py-2.5 rounded-xl text-sm font-medium ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/8 text-white'}`}>Sign In</Link>
-                    <Link to="/register" onClick={() => setMobileOpen(false)}
-                      className="text-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
-                      style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>Register</Link>
-                  </div>
-                )}
-              </div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="fixed inset-0 z-[55] bg-black/40 lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <div className="lg:hidden">
+              <MobileMenu onClose={() => setMobileOpen(false)} />
             </div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
-}
-
-/* Maps Tailwind gradient class → CSS stops for inline style */
-function getGradColor(cls) {
-  const m = {
-    'from-blue-500 to-indigo-600':   'rgba(59,130,246,0.15), rgba(79,70,229,0.15)',
-    'from-emerald-500 to-teal-600':  'rgba(16,185,129,0.15), rgba(13,148,136,0.15)',
-    'from-violet-500 to-purple-600': 'rgba(139,92,246,0.15), rgba(147,51,234,0.15)',
-    'from-rose-500 to-pink-600':     'rgba(244,63,94,0.15),  rgba(219,39,119,0.15)',
-  };
-  return m[cls] || 'rgba(59,130,246,0.12), rgba(139,92,246,0.12)';
 }

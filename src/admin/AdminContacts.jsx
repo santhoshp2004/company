@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import AdminTopbar from './components/AdminTopbar';
 import DataTable from './components/DataTable';
-import { api } from '../utils/api';
+
 
 export default function AdminContacts() {
   const [contacts, setContacts] = useState([]);

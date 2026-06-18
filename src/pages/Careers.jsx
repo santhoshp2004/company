@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme, THEMES } from '../context/ThemeContext';
 
-const JOBS = [
-  { id:1, role:'Senior Full-Stack Developer', team:'Engineering', type:'Full-time', location:'Remote', exp:'5+ years', skills:['React','Node.js','PostgreSQL','Docker'], desc:'Build and maintain scalable web applications across our product suite.' },
-  { id:2, role:'React Native Developer', team:'Engineering', type:'Full-time', location:'Remote', exp:'3+ years', skills:['React Native','JavaScript','iOS','Android'], desc:'Develop cross-platform mobile apps for our healthcare and education products.' },
-  { id:3, role:'Backend Developer (Python)', team:'Engineering', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Python','Django','REST APIs','AWS'], desc:'Design and build robust APIs powering our enterprise platforms.' },
-  { id:4, role:'DevOps Engineer', team:'Infrastructure', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Kubernetes','CI/CD','Terraform','Linux'], desc:'Own deployment pipelines and cloud infrastructure across product environments.' },
-  { id:5, role:'UI/UX Product Designer', team:'Design', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Figma','Design Systems','User Research','Prototyping'], desc:'Lead product design from research to pixel-perfect delivery across Beta products.' },
-  { id:6, role:'Business Development Manager', team:'Sales', type:'Full-time', location:'Chennai', exp:'5+ years', skills:['B2B Sales','CRM','Negotiation','Client Management'], desc:'Drive enterprise sales for Beta Softnet ERP, CRM and vertical products.' },
+/* ── Static fallback jobs shown when no admin-added jobs exist ── */
+const DEFAULT_JOBS = [
+  { id:'d1', role:'Senior Full-Stack Developer', team:'Engineering', type:'Full-time', location:'Remote', exp:'5+ years', skills:['React','Node.js','PostgreSQL','Docker'], description:'Build and maintain scalable web applications across our product suite.' },
+  { id:'d2', role:'React Native Developer', team:'Engineering', type:'Full-time', location:'Remote', exp:'3+ years', skills:['React Native','JavaScript','iOS','Android'], description:'Develop cross-platform mobile apps for our healthcare and education products.' },
+  { id:'d3', role:'Backend Developer (Python)', team:'Engineering', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Python','Django','REST APIs','AWS'], description:'Design and build robust APIs powering our enterprise platforms.' },
+  { id:'d4', role:'DevOps Engineer', team:'Infrastructure', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Kubernetes','CI/CD','Terraform','Linux'], description:'Own deployment pipelines and cloud infrastructure across product environments.' },
+  { id:'d5', role:'UI/UX Product Designer', team:'Design', type:'Full-time', location:'Remote', exp:'4+ years', skills:['Figma','Design Systems','User Research','Prototyping'], description:'Lead product design from research to pixel-perfect delivery across Beta products.' },
+  { id:'d6', role:'Business Development Manager', team:'Sales', type:'Full-time', location:'Chennai', exp:'5+ years', skills:['B2B Sales','CRM','Negotiation','Client Management'], description:'Drive enterprise sales for Beta Softnet ERP, CRM and vertical products.' },
 ];
 
+/* ── Static fallback internships ── */
 const INTERNSHIPS = [
   { id:1, role:'Frontend Developer Intern', team:'Engineering', duration:'6 months', stipend:'₹15,000/mo', skills:['React','Tailwind CSS','JavaScript'] },
   { id:2, role:'Backend Developer Intern', team:'Engineering', duration:'6 months', stipend:'₹15,000/mo', skills:['Node.js','MySQL','REST APIs'] },
@@ -38,8 +40,32 @@ const fadeUp = { hidden:{opacity:0,y:14}, visible:(i)=>({opacity:1,y:0,transitio
 export default function Careers() {
   const { theme } = useTheme();
   const isLight = theme === THEMES.VISION;
-  const [section, setSection] = useState('jobs');
+  const [section,     setSection]     = useState('jobs');
   const [expandedJob, setExpandedJob] = useState(null);
+
+  /* ── Live jobs from localStorage (key: "jobs") ──
+     Falls back to DEFAULT_JOBS when no admin jobs exist.
+     Re-reads on every storage event (cross-tab support).       */
+  const [jobs, setJobs] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('jobs') || '[]');
+      return stored.length > 0 ? stored : DEFAULT_JOBS;
+    } catch { return DEFAULT_JOBS; }
+  });
+
+  useEffect(() => {
+    function sync() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('jobs') || '[]');
+        setJobs(stored.length > 0 ? stored : DEFAULT_JOBS);
+      } catch { setJobs(DEFAULT_JOBS); }
+    }
+    /* Poll every 2 s so changes made in the admin tab appear
+       without requiring a full page reload                    */
+    const interval = setInterval(sync, 2000);
+    window.addEventListener('storage', sync);
+    return () => { clearInterval(interval); window.removeEventListener('storage', sync); };
+  }, []);
 
   const pageBg    = isLight ? 'bg-slate-50'   : 'bg-[#07071a]';
   const sidebarBg = isLight ? 'bg-white border-r border-slate-200' : 'bg-[#0c0c22] border-r border-white/8';
@@ -92,51 +118,78 @@ export default function Careers() {
             {section === 'jobs' && (
               <motion.div key="jobs" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className={`text-xl font-black ${headingCls}`}>Open Positions <span className="text-blue-500">({JOBS.length})</span></h2>
+                  <h2 className={`text-xl font-black ${headingCls}`}>
+                    Open Positions <span className="text-blue-500">({jobs.length})</span>
+                  </h2>
                 </div>
-                <div className="space-y-3">
-                  {JOBS.map((job, i) => (
-                    <motion.div key={job.id} custom={i} variants={fadeUp} initial="hidden" animate="visible"
-                      className={`rounded-2xl border p-5 transition-all duration-200 cursor-pointer ${expandedJob === job.id ? (isLight ? 'border-blue-300 shadow-lg shadow-blue-50' : 'border-blue-500/40') : cardBase}`}
-                      onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <h3 className={`text-base font-bold ${headingCls}`}>{job.role}</h3>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/15 text-blue-400'}`}>{job.team}</span>
+
+                {jobs.length === 0 ? (
+                  <div className="text-center py-16">
+                    <p className="text-4xl mb-3">📋</p>
+                    <p className={`text-sm ${subCls}`}>No open positions right now. Check back soon.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {jobs.map((job, i) => {
+                      /* Support both admin fields (title/experience/description)
+                         and static fallback fields (role/exp/desc)             */
+                      const jobTitle = job.title || job.role || 'Untitled Role';
+                      const jobTeam  = job.team  || 'General';
+                      const jobType  = job.type  || 'Full-time';
+                      const jobLoc   = job.location || '—';
+                      const jobExp   = job.experience || job.exp || '—';
+                      const jobDesc  = job.description || job.desc || '';
+                      const jobSkills= Array.isArray(job.skills)
+                        ? job.skills
+                        : (job.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+
+                      return (
+                        <motion.div key={job.id} custom={i} variants={fadeUp} initial="hidden" animate="visible"
+                          className={`rounded-2xl border p-5 transition-all duration-200 cursor-pointer ${expandedJob === job.id ? (isLight ? 'border-blue-300 shadow-lg shadow-blue-50' : 'border-blue-500/40') : cardBase}`}
+                          onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex-1">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <h3 className={`text-base font-bold ${headingCls}`}>{jobTitle}</h3>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/15 text-blue-400'}`}>{jobTeam}</span>
+                              </div>
+                              <div className={`flex flex-wrap gap-3 text-xs ${subCls}`}>
+                                <span>📍 {jobLoc}</span>
+                                <span>🕒 {jobType}</span>
+                                <span>💼 {jobExp}</span>
+                                {job.salary && <span>💰 {job.salary}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a href="mailto:santhoshp232004@gmail.com?subject=Job Application"
+                                onClick={e => e.stopPropagation()}
+                                className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+                                style={{ background:'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
+                                Apply
+                              </a>
+                              <svg className={`w-4 h-4 transition-transform ${expandedJob === job.id ? 'rotate-180' : ''} ${subCls}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+                              </svg>
+                            </div>
                           </div>
-                          <div className={`flex flex-wrap gap-3 text-xs ${subCls}`}>
-                            <span>📍 {job.location}</span>
-                            <span>🕒 {job.type}</span>
-                            <span>💼 {job.exp}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <a href="mailto:santhoshp232004@gmail.com?subject=Job Application"
-                            onClick={e => e.stopPropagation()}
-                            className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                            style={{ background:'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
-                            Apply
-                          </a>
-                          <svg className={`w-4 h-4 transition-transform ${expandedJob === job.id ? 'rotate-180' : ''} ${subCls}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-                          </svg>
-                        </div>
-                      </div>
-                      {expandedJob === job.id && (
-                        <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}}
-                          className="mt-4 pt-4 border-t" style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.08)' }}>
-                          <p className={`text-sm mb-3 ${subCls}`}>{job.desc}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {job.skills.map(s => (
-                              <span key={s} className={`px-2.5 py-1 text-xs rounded-lg font-medium ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-gray-300'}`}>{s}</span>
-                            ))}
-                          </div>
+                          {expandedJob === job.id && (
+                            <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={{opacity:0,height:0}}
+                              className="mt-4 pt-4 border-t" style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.08)' }}>
+                              {jobDesc && <p className={`text-sm mb-3 ${subCls}`}>{jobDesc}</p>}
+                              {jobSkills.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                  {jobSkills.map(s => (
+                                    <span key={s} className={`px-2.5 py-1 text-xs rounded-lg font-medium ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-gray-300'}`}>{s}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </motion.div>
+                          )}
                         </motion.div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </motion.div>
             )}
 

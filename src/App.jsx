@@ -22,6 +22,7 @@ import Profile         from './pages/Profile';
 import Dashboard       from './pages/Dashboard';
 import BrandShowcase   from './pages/BrandShowcase';
 import AdminLayout     from './admin/AdminLayout';
+import AdminLogin      from './admin/AdminLogin';
 
 /** Smooth page transition wrapper */
 function PageTransition({ children }) {
@@ -95,8 +96,10 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Auth — no Navbar/Footer */}
-            <Route path="/login"    element={<AuthLayout><Login /></AuthLayout>} />
-            <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
+            <Route path="/login"        element={<AuthLayout><Login /></AuthLayout>} />
+            <Route path="/register"     element={<AuthLayout><Register /></AuthLayout>} />
+            {/* Admin login — standalone, no Navbar/Footer */}
+            <Route path="/admin/login"  element={<AdminLogin />} />
             {/* All other routes */}
             <Route path="/*" element={<MainLayout />} />
           </Routes>

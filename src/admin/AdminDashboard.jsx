@@ -1,123 +1,114 @@
-import { useEffect, useState } from 'react';
-import AdminTopbar from './components/AdminTopbar';
-import StatCard from './components/StatCard';
-import ChartPreview from './components/ChartPreview';
-import DataTable from './components/DataTable';
-import { api } from '../utils/api';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Briefcase, GraduationCap, Package, Handshake, ArrowRight } from 'lucide-react';
+import AdminStatCard from './components/AdminStatCard';
+import { getJobs, getInternships, getAdminProducts, getPartners, getAdminSession } from './adminStore';
 
-const defaultAnalytics = {
-  users: 1280,
-  employees: 356,
-  applications: 1420,
-  activeJobs: 42,
-  visitors: 57800,
-  contactRequests: 122,
-  revenue: 495000,
-  charts: {
-    monthlyApplications: [24, 36, 42, 53, 68, 74, 83, 91, 102, 118, 129, 141],
-    traffic: [12, 22, 28, 48, 61, 72, 88, 94, 103, 112, 127, 134],
-    employeeGrowth: [8, 16, 19, 26, 34, 45, 53, 61, 70, 80, 92, 101],
-    jobPostingAnalytics: [10, 18, 30, 39, 52, 60, 72, 79, 86, 93, 106, 118],
-  },
-};
-
-const recentActivities = [
-  { type: 'User', message: 'Super Admin created a new HR Admin account.', time: '12 min ago' },
-  { type: 'Job', message: 'Marketing Manager role moved to Interview Scheduled.', time: '45 min ago' },
-  { type: 'Content', message: 'Homepage hero updated by Content Manager.', time: '2h ago' },
-  { type: 'Partner', message: 'New strategic partner request approved.', time: '5h ago' },
+const QUICK_LINKS = [
+  { to: '/admin/careers',     label: 'Manage Jobs',         icon: <Briefcase size={16} />,    color: '#2563eb' },
+  { to: '/admin/internships', label: 'Manage Internships',  icon: <GraduationCap size={16} />,color: '#7c3aed' },
+  { to: '/admin/products',    label: 'Manage Products',     icon: <Package size={16} />,      color: '#16a34a' },
+  { to: '/admin/partners',    label: 'Manage Partners',     icon: <Handshake size={16} />,    color: '#dc2626' },
 ];
 
-
-
 export default function AdminDashboard() {
-  const [analytics, setAnalytics] = useState(defaultAnalytics);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    api.analytics.get()
-      .then((data) => {
-        setAnalytics(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || 'Could not load analytics');
-        setLoading(false);
-      });
-  }, []);
+  const session  = getAdminSession();
+  const jobs     = useMemo(getJobs,          []);
+  const interns  = useMemo(getInternships,   []);
+  const products = useMemo(getAdminProducts, []);
+  const partners = useMemo(getPartners,      []);
 
   const stats = [
-    { title: 'Total Users', value: analytics.users.toLocaleString(), icon: '👥' },
-    { title: 'Total Employees', value: analytics.employees.toLocaleString(), icon: '🧑‍💼', color: 'from-emerald-500 to-teal-500' },
-    { title: 'Active Jobs', value: analytics.activeJobs.toString(), icon: '📌', color: 'from-violet-500 to-fuchsia-500' },
-    { title: 'Visitor Sessions', value: analytics.visitors.toLocaleString(), icon: '🌐', color: 'from-sky-500 to-cyan-500' },
-  ];
-
-  const chartData = analytics.charts;
-  const summary = [
-    { label: 'Total Users', value: analytics.users.toLocaleString() },
-    { label: 'Total Employees', value: analytics.employees.toLocaleString() },
-    { label: 'Total Job Applications', value: analytics.applications.toLocaleString() },
-    { label: 'Total Active Jobs', value: analytics.activeJobs.toString() },
+    { icon: '💼', label: 'Total Jobs',         value: jobs.length,     color: '#2563eb', delay: 0    },
+    { icon: '🎓', label: 'Total Internships',  value: interns.length,  color: '#7c3aed', delay: 0.07 },
+    { icon: '📦', label: 'Total Products',     value: products.length, color: '#16a34a', delay: 0.14 },
+    { icon: '🤝', label: 'Total Partners',     value: partners.length, color: '#dc2626', delay: 0.21 },
   ];
 
   return (
-    <div className="space-y-6">
-      <AdminTopbar pageTitle="Super Admin Dashboard" statsSummary={summary} />
-      {error ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-red-300">{error}</div>
-      ) : null}
-      <section className="grid gap-6 xl:grid-cols-3">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+    <div className="p-8">
+      {/* Welcome */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+        className="mb-8 p-6 rounded-2xl border border-green-100"
+        style={{ background: 'linear-gradient(135deg,#f0fdf4,#dcfce7)' }}>
+        <p className="text-xs font-bold tracking-widest uppercase text-green-600 mb-1">Welcome back</p>
+        <h1 className="text-2xl font-black text-slate-900">Admin Dashboard</h1>
+        <p className="text-sm text-slate-600 mt-1">
+          Signed in as <span className="font-semibold text-green-700">{session?.email}</span> · {session?.role}
+        </p>
+      </motion.div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        {stats.map(s => (
+          <AdminStatCard key={s.label} {...s} />
         ))}
-      </section>
+      </div>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <ChartPreview title="Monthly Applications" data={chartData.applications} />
-        <ChartPreview title="Website Traffic" data={chartData.traffic} color="from-sky-500 to-blue-500" />
-        <ChartPreview title="Employee Growth" data={chartData.growth} color="from-emerald-500 to-lime-500" />
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <ChartPreview title="Job Posting Analytics" data={chartData.posting} color="from-purple-500 to-pink-500" />
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-black/10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">Recent Activities</h2>
-            <span className="text-xs uppercase tracking-[0.3em] text-gray-400">Live feed</span>
-          </div>
-          <div className="space-y-4">
-            {recentActivities.map((item, index) => (
-              <div key={index} className="rounded-3xl border border-white/10 bg-dark-800/80 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-semibold text-white">{item.type}</p>
-                  <span className="text-xs text-gray-400">{item.time}</span>
+      {/* Quick links */}
+      <h2 className="text-base font-bold text-slate-700 mb-4">Quick Actions</h2>
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        {QUICK_LINKS.map(({ to, label, icon, color }, i) => (
+          <motion.div key={to} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.07 }}>
+            <Link to={to}
+              className="group flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: color + '15', color }}>
+                  {icon}
                 </div>
-                <p className="mt-2 text-sm text-gray-300">{item.message}</p>
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">{label}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <ArrowRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+            </Link>
+          </motion.div>
+        ))}
+      </div>
 
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-black/10">
-        <h2 className="text-lg font-bold text-white mb-4">Executive Summary</h2>
-        <DataTable
-          title="Key performance snapshot"
-          columns={[
-            { key: 'metric', label: 'Metric' },
-            { key: 'value', label: 'Current' },
-            { key: 'trend', label: 'Trend' },
-          ]}
-          rows={[
-            { metric: 'Conversion Rate', value: '7.8%', trend: '↑ 1.2%' },
-            { metric: 'Resume Reviews', value: '842', trend: '↑ 14%' },
-            { metric: 'New Contacts', value: '1,140', trend: '↑ 9%' },
-            { metric: 'Support Tickets', value: '27', trend: '↓ 5%' },
-          ]}
-        />
-      </section>
+      {/* Recent entries */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Latest jobs */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-800">Latest Jobs</h3>
+            <Link to="/admin/careers" className="text-xs font-semibold text-green-600 hover:text-green-700">View all →</Link>
+          </div>
+          {jobs.length === 0
+            ? <p className="text-xs text-slate-400 text-center py-4">No jobs yet</p>
+            : jobs.slice(-5).reverse().map(j => (
+              <div key={j.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{j.title}</p>
+                  <p className="text-xs text-slate-400">{j.location} · {j.experience}</p>
+                </div>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">{j.salary || '—'}</span>
+              </div>
+            ))
+          }
+        </div>
+
+        {/* Latest internships */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-800">Latest Internships</h3>
+            <Link to="/admin/internships" className="text-xs font-semibold text-green-600 hover:text-green-700">View all →</Link>
+          </div>
+          {interns.length === 0
+            ? <p className="text-xs text-slate-400 text-center py-4">No internships yet</p>
+            : interns.slice(-5).reverse().map(i => (
+              <div key={i.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{i.title}</p>
+                  <p className="text-xs text-slate-400">{i.duration}</p>
+                </div>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700">{i.stipend || '—'}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
     </div>
   );
 }

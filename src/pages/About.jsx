@@ -123,23 +123,28 @@ export default function About() {
                   </div>
                 </div>
 
-                {/* Timeline */}
-                <h3 className={`text-base font-bold mb-6 ${headingCls}`}>Our Journey</h3>
-                <div className="relative">
+                {/* ════════════ TIMELINE ════════════ */}
+                <h3 className={`text-base font-bold mb-8 ${headingCls}`}>Our Journey</h3>
 
-                  {/* ── Vertical line — dark blue, 4px, gradient, shadow ── */}
+                {/* Outer wrapper — positions the vertical line */}
+                <div className="relative pl-10">
+
+                  {/* ── Vertical spine: 4 px · dark-blue gradient · shadow ── */}
                   <div
-                    className="absolute top-0 bottom-0 rounded-full"
+                    aria-hidden="true"
                     style={{
-                      left: '9px',
+                      position: 'absolute',
+                      left: '9px',           /* centre of the 20 px dot */
+                      top: 0,
+                      bottom: 0,
                       width: '4px',
-                      background: 'linear-gradient(180deg, #1E3A8A 0%, #1D4ED8 35%, #2563EB 65%, #3B82F6 100%)',
-                      boxShadow: '0 0 8px 2px rgba(30,58,138,0.45), 0 2px 16px rgba(37,99,235,0.3)',
                       borderRadius: '9999px',
+                      background: 'linear-gradient(180deg,#0F172A 0%,#1E3A8A 20%,#1D4ED8 50%,#2563EB 75%,#3B82F6 100%)',
+                      boxShadow: '0 0 0 1px rgba(30,58,138,0.18), 0 0 12px 3px rgba(30,58,138,0.40), 0 4px 24px rgba(37,99,235,0.25)',
                     }}
                   />
 
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {MILESTONES.map(({ year, title, desc }, i) => (
                       <motion.div
                         key={year}
@@ -147,41 +152,75 @@ export default function About() {
                         variants={fadeUp}
                         initial="hidden"
                         animate="visible"
-                        className="flex gap-6 pl-12 relative"
+                        className="relative flex items-start gap-5"
                       >
-                        {/* ── Timeline dot ── */}
+                        {/* ── Timeline dot: 20 px · dark-blue fill · white border · glow ── */}
                         <motion.div
-                          whileHover={{ scale: 1.2 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-                          className="absolute flex-shrink-0 flex items-center justify-center"
+                          whileHover={{ scale: 1.3 }}
+                          transition={{ type: 'spring', stiffness: 460, damping: 16 }}
+                          aria-hidden="true"
                           style={{
-                            left: '-2px',
-                            top: '14px',
-                            width: '24px',
-                            height: '24px',
+                            position: 'absolute',
+                            left: '-31px',   /* (10 - half-dot) keeps dot centred on spine */
+                            top: '13px',
+                            width: '20px',
+                            height: '20px',
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
-                            border: '3px solid white',
-                            boxShadow: '0 0 0 2px #1D4ED8, 0 4px 12px rgba(30,58,138,0.5), 0 2px 6px rgba(0,0,0,0.2)',
-                            zIndex: 2,
+                            flexShrink: 0,
+                            background: 'linear-gradient(135deg,#0F172A 0%,#1E3A8A 45%,#2563EB 100%)',
+                            border: '3px solid #ffffff',
+                            outline: '2px solid #1D4ED8',
+                            outlineOffset: '1px',
+                            boxShadow: [
+                              '0 0 0 4px rgba(30,58,138,0.15)',
+                              '0 0 14px 4px rgba(29,78,216,0.55)',
+                              '0 4px 16px rgba(0,0,0,0.28)',
+                            ].join(','),
+                            zIndex: 3,
+                            cursor: 'default',
                           }}
                         >
-                          {/* inner pulse ring */}
-                          <span
-                            className="absolute inset-0 rounded-full animate-ping"
-                            style={{
-                              background: 'rgba(37,99,235,0.25)',
-                              animationDuration: '2.5s',
-                            }}
-                          />
+                          {/* Pulse ring — only on first/last dot for visual interest */}
+                          {(i === 0 || i === MILESTONES.length - 1) && (
+                            <span
+                              className="absolute rounded-full animate-ping"
+                              style={{
+                                inset: '-4px',
+                                background: 'rgba(37,99,235,0.22)',
+                                animationDuration: '2.8s',
+                              }}
+                            />
+                          )}
                         </motion.div>
 
-                        {/* Card */}
-                        <div className={`rounded-2xl border p-4 flex-1 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${cardBase}`}>
-                          <p className="text-xs font-bold text-blue-600 mb-0.5">{year}</p>
-                          <p className={`text-sm font-bold mb-1 ${headingCls}`}>{title}</p>
+                        {/* ── Milestone card ── */}
+                        <motion.div
+                          whileHover={{ y: -2, boxShadow: isLight ? '0 8px 32px rgba(30,58,138,0.12)' : '0 8px 32px rgba(30,58,138,0.35)' }}
+                          transition={{ duration: 0.2 }}
+                          className={[
+                            'flex-1 rounded-2xl border p-5 transition-colors duration-200 cursor-default',
+                            isLight
+                              ? 'bg-white border-slate-200 hover:border-blue-200'
+                              : 'bg-white/5 border-white/8 hover:border-blue-500/40',
+                          ].join(' ')}
+                        >
+                          {/* Year badge */}
+                          <span
+                            className="inline-block mb-2 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-widest uppercase"
+                            style={{
+                              background: isLight
+                                ? 'linear-gradient(135deg,#EFF6FF,#DBEAFE)'
+                                : 'linear-gradient(135deg,rgba(30,58,138,0.4),rgba(37,99,235,0.3))',
+                              color: isLight ? '#1D4ED8' : '#93C5FD',
+                              border: isLight ? '1px solid #BFDBFE' : '1px solid rgba(59,130,246,0.3)',
+                            }}
+                          >
+                            {year}
+                          </span>
+
+                          <p className={`text-sm font-bold leading-snug mb-1.5 ${headingCls}`}>{title}</p>
                           <p className={`text-xs leading-relaxed ${subCls}`}>{desc}</p>
-                        </div>
+                        </motion.div>
                       </motion.div>
                     ))}
                   </div>

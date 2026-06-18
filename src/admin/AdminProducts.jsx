@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import AdminTopbar from './components/AdminTopbar';
 import DataTable from './components/DataTable';
-import { api } from '../utils/api';
+
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
