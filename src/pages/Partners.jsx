@@ -1,242 +1,200 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme, THEMES } from '../context/ThemeContext';
 
-const benefits = [
-  { icon: '💰', title: 'Revenue Share', desc: 'Earn competitive recurring revenue on every partner referral and subscription.' },
-  { icon: '🎓', title: 'Partner Enablement', desc: 'Access co-branded materials, training programs, and launch support.' },
-  { icon: '🔧', title: 'Technical Support', desc: 'Work directly with our engineering team for integration and deployment success.' },
-  { icon: '📈', title: 'Growth Guidance', desc: 'Receive strategic insights to scale deals, close faster, and build recurring streams.' },
-  { icon: '🌍', title: 'Global Reach', desc: 'Collaborate with a partner network spanning regions, industries, and enterprise accounts.' },
-  { icon: '🤝', title: 'Aligned Success', desc: 'Execute shared go-to-market plans that reward both partners and USEMETA equally.' },
+const TECH_PARTNERS = [
+  { name:'AWS', desc:'Cloud infrastructure hosting for Beta Softnet products with enterprise SLA.', category:'Cloud' },
+  { name:'Microsoft Azure', desc:'Enterprise cloud and identity services integration for Beta HMS and ERP.', category:'Cloud' },
+  { name:'Razorpay', desc:'Payment gateway integration for Beta Billing, Fee Manager and Payroll modules.', category:'Payments' },
+  { name:'Twilio', desc:'SMS and communication services for OTP, alerts and notifications across products.', category:'Communications' },
+  { name:'Zoho', desc:'CRM and productivity suite integration available for Beta CRM customers.', category:'Productivity' },
+  { name:'Tally', desc:'Accounting data sync and migration support for Beta Accounts users.', category:'Finance' },
 ];
 
-const partnerTypes = [
-  { name: 'Integration Partner', category: 'Technology', description: 'Extend USEMETA products with seamless platform integrations.' },
-  { name: 'Reseller Partner', category: 'Sales', description: 'Resell USEMETA solutions to clients who need enterprise-grade SaaS.' },
-  { name: 'Consulting Partner', category: 'Services', description: 'Deliver strategic implementations and digital transformation programs.' },
-  { name: 'Agency Partner', category: 'Marketing', description: 'Support customers with digital growth strategy and product adoption.' },
-  { name: 'Enterprise Partner', category: 'Strategic', description: 'Co-create and launch tailored solutions for large organisations.' },
-  { name: 'Regional Partner', category: 'Local', description: 'Bring USEMETA to new markets with local expertise and network reach.' },
+const STRATEGIC_PARTNERS = [
+  { name:'BrightPath Consulting', result:'Implemented Beta ERP and CRM across 12 manufacturing enterprises in Tamil Nadu.', region:'South India' },
+  { name:'TechEdge Solutions', result:'Deployed Beta School ERP in 30+ institutions across Karnataka and Andhra Pradesh.', region:'South India' },
+  { name:'NexGen Digital', result:'Digital transformation projects using Beta HMS and Clinic products for hospital chains.', region:'Pan India' },
+  { name:'Catalyst Advisory', result:'Beta Payroll and HRMS implementation for mid-market companies across Maharashtra.', region:'West India' },
 ];
 
-const tiers = [
-  {
-    name: 'Standard', commission: '15%', color: 'from-slate-500 to-slate-600',
-    perks: ['Partner directory listing', 'Marketing toolkit', 'Quarterly updates', 'Email support'],
-  },
-  {
-    name: 'Business', commission: '22%', color: 'from-blue-500 to-violet-500', popular: true,
-    perks: ['Everything in Standard', 'Dedicated partner manager', 'Priority technical reviews', 'Early roadmap access'],
-  },
-  {
-    name: 'Enterprise', commission: '30%', color: 'from-violet-500 to-cyan-500',
-    perks: ['Everything in Business', 'Co-selling enablement', 'Executive alignment sessions', 'Joint innovation workshops'],
-  },
+const BENEFITS = [
+  { icon:'💰', title:'Revenue Share', desc:'Earn competitive recurring commissions on every implementation and subscription.' },
+  { icon:'🎓', title:'Partner Training', desc:'Access to certified training, product demos, and co-branded sales collateral.' },
+  { icon:'🔧', title:'Technical Support', desc:'Dedicated engineering contact for integration, migration, and go-live assistance.' },
+  { icon:'📈', title:'Joint Marketing', desc:'Co-marketing opportunities including case studies, webinars and events.' },
 ];
 
-const stories = [
-  { name: 'BrightPath Consulting', result: '5x revenue growth with USEMETA automation solutions across finance teams.' },
-  { name: 'NexGen Software', result: 'Expanded product delivery through secure integrations and joint deployment support.' },
+const SIDE_ITEMS = [
+  { key:'tech',      label:'Technology Partners', icon:'⚙️' },
+  { key:'strategic', label:'Strategic Partners',  icon:'🤝' },
+  { key:'become',    label:'Become a Partner',    icon:'🚀' },
 ];
 
-const processSteps = [
-  { title: 'Discovery', detail: 'Share your business goals and partnership ambitions with the USEMETA team.' },
-  { title: 'Alignment', detail: 'Define the partner tier, market focus, and operational readiness.' },
-  { title: 'Launch', detail: 'Activate enablement, sales support, and shared customer success workflows.' },
-  { title: 'Scale', detail: 'Grow deals together with performance reviews, best practices, and ongoing collaboration.' },
-];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
+const fadeUp = { hidden:{opacity:0,y:14}, visible:(i)=>({opacity:1,y:0,transition:{delay:i*0.07,duration:0.32}}) };
 
 export default function Partners() {
-  const { theme, t } = useTheme();
+  const { theme } = useTheme();
   const isLight = theme === THEMES.VISION;
-  const [formState, setFormState] = useState({ name: '', email: '', company: '', partnerType: '', message: '' });
+  const [section, setSection] = useState('tech');
+  const [form, setForm] = useState({ name:'', email:'', company:'', type:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
 
-  const cardCls = isLight ? 'bg-white/80 backdrop-blur-xl border border-slate-200/80' : 'bg-white/5 backdrop-blur-md border border-white/10';
+  const pageBg     = isLight ? 'bg-slate-50'   : 'bg-[#07071a]';
+  const sidebarBg  = isLight ? 'bg-white border-r border-slate-200' : 'bg-[#0c0c22] border-r border-white/8';
   const headingCls = isLight ? 'text-slate-900' : 'text-white';
-  const subTxtCls = isLight ? 'text-slate-600' : 'text-gray-400';
-
-  function handleFormChange(event) {
-    const { name, value } = event.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    setSubmitted(true);
-  }
+  const subCls     = isLight ? 'text-slate-500' : 'text-gray-400';
+  const cardBase   = isLight ? 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-md' : 'bg-white/5 border border-white/8 hover:border-blue-500/30';
+  const inputCls   = isLight
+    ? 'w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-blue-400 transition-all'
+    : 'w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-400 transition-all';
 
   return (
-    <main className="min-h-screen pt-24 pb-20" style={t.pageBgStyle}>
-      <div className="section-container">
-
-        <motion.div className="text-center mb-16" initial="hidden" animate="visible" variants={fadeUp}>
-          <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight ? 'text-blue-600' : 'text-primary-400'}`}>Partner Ecosystem</p>
-          <h1 className={`text-5xl sm:text-6xl font-black leading-tight mb-4 ${headingCls}`}>
-            Build strategic growth with<br />
-            <span className={t.gradientText}>USEMETA partnerships.</span>
-          </h1>
-          <p className={`text-lg max-w-2xl mx-auto ${subTxtCls}`}>
-            Collaborate with a premium partner network to deliver secure, modern software solutions that help your customers thrive.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-20">
-          {benefits.map(({ icon, title, desc }, index) => (
-            <motion.div key={title} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-              style={{ transitionDelay: `${index * 0.07}s` }}
-              className={`${cardCls} rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1`}>
-              <div className="text-4xl mb-4">{icon}</div>
-              <h3 className={`text-xl font-bold mb-3 ${headingCls}`}>{title}</h3>
-              <p className={`text-sm leading-relaxed ${subTxtCls}`}>{desc}</p>
-            </motion.div>
-          ))}
+    <div className={`min-h-screen ${pageBg} pt-[62px]`}>
+      {/* Header */}
+      <div className={`border-b px-6 py-5 ${isLight ? 'bg-white border-slate-200' : 'bg-[#0c0c22] border-white/8'}`}>
+        <div className="max-w-7xl mx-auto">
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-500 mb-1">Partner Ecosystem</p>
+          <h1 className={`text-2xl font-black ${headingCls}`}>Beta Softnet Partners</h1>
+          <p className={`text-sm mt-1 ${subCls}`}>Grow your business through our partner network.</p>
         </div>
-
-        <div className="mb-20 grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`${cardCls} rounded-3xl p-8`}>
-            <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Why Partner With USEMETA</h2>
-            <p className={`text-base leading-relaxed mb-6 ${subTxtCls}`}>
-              USEMETA offers a premium partner programme built for organisations that want to grow with trusted enterprise-grade products.
-            </p>
-            <ul className="space-y-4">
-              {[
-                'Structured co-selling programs for sustained revenue acceleration.',
-                'Dedicated enablement and product certification for partner teams.',
-                'Robust platform integrations with strong technical guidance.',
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-1 text-primary-400">•</span>
-                  <p className={`text-sm leading-relaxed ${subTxtCls}`}>{item}</p>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`${cardCls} rounded-3xl p-8`}>
-            <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Application Process</h2>
-            <div className="space-y-4">
-              {processSteps.map((step, index) => (
-                <div key={step.title} className="rounded-3xl p-5 bg-white/5 border border-white/10">
-                  <p className="text-xs uppercase tracking-[0.28em] text-primary-400 mb-2">Step {index + 1}</p>
-                  <h3 className={`text-lg font-bold ${headingCls}`}>{step.title}</h3>
-                  <p className={`text-sm leading-relaxed ${subTxtCls}`}>{step.detail}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="mb-20">
-          <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <h2 className={`text-3xl font-black mb-2 ${headingCls}`}>Partner Categories</h2>
-            <p className={subTxtCls}>A diverse ecosystem for integrations, resale, consulting, and enterprise delivery.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {partnerTypes.map((type, index) => (
-              <motion.div key={type.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-                style={{ transitionDelay: `${index * 0.06}s` }}
-                className={`${cardCls} rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1`}>
-                <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 w-12 h-12">{type.name.charAt(0)}</div>
-                <h3 className={`text-lg font-bold mb-2 ${headingCls}`}>{type.name}</h3>
-                <p className={`text-sm ${subTxtCls}`}>{type.description}</p>
-                <p className="mt-4 text-xs uppercase tracking-[0.24em] text-primary-400">{type.category}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-20">
-          <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <h2 className={`text-3xl font-black mb-2 ${headingCls}`}>Success Stories</h2>
-            <p className={subTxtCls}>Partners delivering measurable outcomes through joint product initiatives.</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {stories.map((story, index) => (
-              <motion.div key={story.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-                style={{ transitionDelay: `${index * 0.08}s` }}
-                className={`${cardCls} rounded-3xl p-8`}>
-                <p className="text-xs uppercase tracking-[0.28em] text-primary-400 mb-3">{story.name}</p>
-                <h3 className={`text-2xl font-black mb-4 ${headingCls}`}>{story.result}</h3>
-                <p className={`text-sm leading-relaxed ${subTxtCls}`}>USEMETA provided the product expertise, integration support, and co-marketing engine behind each success story.</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <motion.div className={`${cardCls} rounded-3xl p-10`} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10">
-            <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-primary-400 mb-3">Become a Partner</p>
-              <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Apply to join the USEMETA network</h2>
-              <p className={`text-sm leading-relaxed mb-8 ${subTxtCls}`}>
-                Tell us about your business and partnership goals. We will follow up with a tailored plan and next steps.
-              </p>
-            </div>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 gap-4">
-                <input
-                  name="name"
-                  value={formState.name}
-                  onChange={handleFormChange}
-                  type="text"
-                  placeholder="Your name"
-                  className="input-field"
-                  required
-                />
-                <input
-                  name="email"
-                  value={formState.email}
-                  onChange={handleFormChange}
-                  type="email"
-                  placeholder="Business email"
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <input
-                  name="company"
-                  value={formState.company}
-                  onChange={handleFormChange}
-                  type="text"
-                  placeholder="Company"
-                  className="input-field"
-                  required
-                />
-                <input
-                  name="partnerType"
-                  value={formState.partnerType}
-                  onChange={handleFormChange}
-                  type="text"
-                  placeholder="Partner type"
-                  className="input-field"
-                  required
-                />
-              </div>
-              <textarea
-                name="message"
-                value={formState.message}
-                onChange={handleFormChange}
-                placeholder="Tell us about your opportunity"
-                rows="5"
-                className="input-field resize-none"
-                required
-              />
-              <button type="submit" className="btn-primary w-full py-4">Submit application</button>
-              {submitted && (
-                <p className="text-sm text-emerald-400">Thanks! We’ll follow up with next steps within one business day.</p>
-              )}
-            </form>
-          </div>
-        </motion.div>
       </div>
-    </main>
+
+      <div className="max-w-7xl mx-auto flex" style={{ minHeight:'calc(100vh - 130px)' }}>
+        {/* Sidebar */}
+        <aside className={`w-56 flex-shrink-0 sticky top-[62px] self-start ${sidebarBg}`} style={{ height:'calc(100vh - 130px)' }}>
+          <div className="py-4">
+            <p className={`px-5 py-2 text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>Navigation</p>
+            {SIDE_ITEMS.map(({ key, label, icon }) => (
+              <button key={key} type="button" onClick={() => setSection(key)}
+                className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all duration-150 text-left border-r-2
+                  ${section === key
+                    ? isLight ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-blue-500/12 text-blue-300 border-blue-400'
+                    : isLight ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent' : 'text-gray-400 hover:bg-white/5 hover:text-white border-transparent'}`}>
+                <span>{icon}</span>{label}
+                {section === key && <svg className="w-3.5 h-3.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/></svg>}
+              </button>
+            ))}
+          </div>
+          <div className={`mx-4 mt-3 p-3 rounded-2xl ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-emerald-500/10 border border-emerald-500/20'}`}>
+            <p className="text-xs font-bold text-emerald-600 mb-1">Contact Us</p>
+            <a href="mailto:santhoshp232004@gmail.com" className="text-xs text-emerald-500 hover:text-emerald-600 block">santhoshp232004@gmail.com</a>
+            <a href="tel:9976017966" className="text-xs text-emerald-500 hover:text-emerald-600 block mt-0.5">+91 9976017966</a>
+          </div>
+        </aside>
+
+        {/* Content */}
+        <main className="flex-1 p-6">
+          <AnimatePresence mode="wait">
+
+            {section === 'tech' && (
+              <motion.div key="tech" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
+                <h2 className={`text-xl font-black mb-2 ${headingCls}`}>Technology Partners</h2>
+                <p className={`text-sm mb-5 ${subCls}`}>Integrations and ecosystem platforms powering Beta Softnet products.</p>
+                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {TECH_PARTNERS.map(({ name, desc, category }, i) => (
+                    <motion.div key={name} custom={i} variants={fadeUp} initial="hidden" animate="visible"
+                      className={`rounded-2xl border p-5 ${cardBase} transition-all duration-200 hover:-translate-y-0.5`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg font-black ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-white'}`}>
+                          {name.charAt(0)}
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/15 text-blue-400'}`}>{category}</span>
+                      </div>
+                      <h3 className={`text-sm font-bold mb-1.5 ${headingCls}`}>{name}</h3>
+                      <p className={`text-xs leading-relaxed ${subCls}`}>{desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="mt-8">
+                  <h3 className={`text-lg font-black mb-4 ${headingCls}`}>Partner Benefits</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {BENEFITS.map(({ icon, title, desc }, i) => (
+                      <motion.div key={title} custom={i+6} variants={fadeUp} initial="hidden" animate="visible"
+                        className={`rounded-2xl border p-4 flex gap-4 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/8'}`}>
+                        <div className="text-2xl flex-shrink-0">{icon}</div>
+                        <div>
+                          <p className={`text-sm font-bold mb-1 ${headingCls}`}>{title}</p>
+                          <p className={`text-xs leading-relaxed ${subCls}`}>{desc}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {section === 'strategic' && (
+              <motion.div key="strategic" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
+                <h2 className={`text-xl font-black mb-2 ${headingCls}`}>Strategic Partners</h2>
+                <p className={`text-sm mb-5 ${subCls}`}>Consulting and implementation partners delivering Beta Softnet solutions across India.</p>
+                <div className="space-y-4">
+                  {STRATEGIC_PARTNERS.map(({ name, result, region }, i) => (
+                    <motion.div key={name} custom={i} variants={fadeUp} initial="hidden" animate="visible"
+                      className={`rounded-2xl border p-6 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/8'}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/15 text-blue-400'}`}>
+                            🤝 Strategic Partner
+                          </div>
+                          <h3 className={`text-lg font-black mb-2 ${headingCls}`}>{name}</h3>
+                          <p className={`text-sm leading-relaxed ${subCls}`}>{result}</p>
+                        </div>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg flex-shrink-0 ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-gray-400'}`}>{region}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {section === 'become' && (
+              <motion.div key="become" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
+                <h2 className={`text-xl font-black mb-2 ${headingCls}`}>Become a Partner</h2>
+                <p className={`text-sm mb-6 ${subCls}`}>Join the Beta Softnet partner network and grow your business with enterprise-grade software solutions.</p>
+                {submitted ? (
+                  <div className={`rounded-2xl border p-8 text-center ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+                    <div className="text-4xl mb-3">✅</div>
+                    <h3 className={`text-lg font-black mb-2 ${headingCls}`}>Application Received!</h3>
+                    <p className={`text-sm ${subCls}`}>We'll follow up at santhoshp232004@gmail.com within one business day.</p>
+                    <button onClick={() => { setSubmitted(false); setForm({ name:'',email:'',company:'',type:'',message:'' }); }}
+                      className="mt-4 text-sm font-semibold text-blue-500 hover:text-blue-600">Submit Another →</button>
+                  </div>
+                ) : (
+                  <form onSubmit={e => { e.preventDefault(); setSubmitted(true); }}
+                    className={`rounded-2xl border p-6 space-y-4 max-w-2xl ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/8'}`}>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div><label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-600' : 'text-gray-400'}`}>Full Name *</label>
+                        <input required type="text" value={form.name} onChange={e => setForm({...form,name:e.target.value})} placeholder="Your name" className={inputCls}/></div>
+                      <div><label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-600' : 'text-gray-400'}`}>Business Email *</label>
+                        <input required type="email" value={form.email} onChange={e => setForm({...form,email:e.target.value})} placeholder="you@company.com" className={inputCls}/></div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div><label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-600' : 'text-gray-400'}`}>Company Name *</label>
+                        <input required type="text" value={form.company} onChange={e => setForm({...form,company:e.target.value})} placeholder="Company" className={inputCls}/></div>
+                      <div><label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-600' : 'text-gray-400'}`}>Partnership Type</label>
+                        <select value={form.type} onChange={e => setForm({...form,type:e.target.value})} className={inputCls}>
+                          <option value="">Select type</option>
+                          <option>Technology Integration</option>
+                          <option>Reseller / Implementation</option>
+                          <option>Strategic Alliance</option>
+                        </select></div>
+                    </div>
+                    <div><label className={`block text-xs font-semibold mb-1.5 ${isLight ? 'text-slate-600' : 'text-gray-400'}`}>Message</label>
+                      <textarea rows={4} value={form.message} onChange={e => setForm({...form,message:e.target.value})} placeholder="Tell us about your partnership goals..." className={`${inputCls} resize-none`}/></div>
+                    <button type="submit" className="px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+                      style={{ background:'linear-gradient(135deg,#3B82F6,#8B5CF6)', boxShadow:'0 4px 14px rgba(59,130,246,0.3)' }}>
+                      Submit Application
+                    </button>
+                  </form>
+                )}
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
   );
 }
