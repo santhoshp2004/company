@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  Mail, Shield, StickyNote,
+  Mail, Shield, StickyNote, User, Briefcase,
   ArrowRight,
 } from 'lucide-react';
 
@@ -26,16 +26,27 @@ const PUBLIC_PRODUCTS = [
     badge: 'PUBLIC',
     desc: 'MFA & SSO Gateway',
     iconBg: '#F0FDF4',
-    iconColor: '#16A34A',
+    iconColor: '#0D9488',
   },
   {
-    Icon: StickyNote,
+    Icon: User,
     name: 'CLIKS',
     badge: 'PUBLIC',
-    desc: 'Notes & Calendars',
-    iconBg: '#FFF7ED',
-    iconColor: '#EA580C',
+    desc: 'Notes & calendars',
+    iconBg: '#DCFCE7',
+    iconColor: '#16A34A',
   },
+];
+
+const BUSINESS_PRODUCTS = [
+  {
+    Icon: Briefcase,
+    name: 'CLIKS BUSINESS',
+    badge: 'BUSINESS',
+    desc: 'Team project chats',
+    iconBg: '#F0FDF4',
+    iconColor: '#0F766E',
+  }
 ];
 
 /* Animation */
@@ -70,8 +81,8 @@ function ProductRow({ Icon, name, badge, desc, iconBg, iconColor, isBusiness, on
           <span
             className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase flex-shrink-0"
             style={isBusiness
-              ? { background: '#FEF3C7', color: '#B45309' }
-              : { background: '#DBEAFE', color: '#1D4ED8' }
+              ? { background: '#F3E8FF', color: '#6B21A8' }
+              : { background: '#F1F5F9', color: '#475569' }
             }
           >
             {badge}
@@ -94,9 +105,8 @@ export default function MegaMenu({ onClose }) {
       style={{
         /* Center under the Products button */
         top: 'calc(100% + 10px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 460,
+        left: '20px',
+        width: 640,
         maxWidth: 'calc(100vw - 32px)',
         backgroundColor: '#ffffff',
         borderRadius: 24,
@@ -105,43 +115,48 @@ export default function MegaMenu({ onClose }) {
         overflow: 'hidden',
       }}
     >
-      {/* ── Header row: CATEGORY | PUBLIC ── */}
+      {/* ── Header row: CATEGORY | PUBLIC | BUSINESS ── */}
       <div
         className="grid text-xs font-bold tracking-widest uppercase px-5 py-3"
         style={{
-          gridTemplateColumns: '140px 1fr',
+          gridTemplateColumns: '100px 1fr 1fr',
           background: '#F8FAFC',
           borderBottom: '1px solid #E2E8F0',
           color: '#94A3B8',
-          gap: '0 16px',
+          gap: '0 24px',
         }}
       >
         <span>Category</span>
         <span>Public</span>
+        <span>Business</span>
       </div>
 
-      {/* ── Body: left = BASE label + PUBLIC ── */}
+      {/* ── Body: 3 columns ── */}
       <div
-        className="grid px-4 py-4 gap-4"
-        style={{ gridTemplateColumns: '140px 1fr' }}
+        className="grid px-4 py-4 gap-x-6 gap-y-4"
+        style={{ gridTemplateColumns: '100px 1fr 1fr' }}
       >
         {/* LEFT — BASE badge */}
-        <div className="flex flex-col pt-1">
+        <div className="flex flex-col pt-1 pl-1">
           <span
-            className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase self-start"
+            className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase self-start"
             style={{ background: '#DCFCE7', color: '#15803D' }}
           >
             BASE
           </span>
-          <p className="text-xs text-slate-400 mt-2 leading-relaxed font-medium">
-            Beta<br />Ecosystem
-          </p>
         </div>
 
         {/* CENTER — PUBLIC products */}
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 border-r border-slate-100 pr-4">
           {PUBLIC_PRODUCTS.map(p => (
             <ProductRow key={p.name} {...p} isBusiness={false} onClose={onClose} />
+          ))}
+        </div>
+
+        {/* RIGHT — BUSINESS products */}
+        <div className="space-y-0.5">
+          {BUSINESS_PRODUCTS.map(p => (
+            <ProductRow key={p.name} {...p} isBusiness={true} onClose={onClose} />
           ))}
         </div>
       </div>
