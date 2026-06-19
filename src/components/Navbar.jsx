@@ -158,7 +158,7 @@ export default function Navbar() {
                 border: scrolled ? '1px solid #e5e7eb' : '1px solid rgba(255,255,255,0.7)',
               }}
             >
-              {/* ── Products button (only one with dropdown arrow) ── */}
+              {/* ── Products button — dropdown centers relative to THIS div ── */}
               <div ref={megaWrapRef} className="relative">
                 <button
                   type="button"
@@ -174,6 +174,19 @@ export default function Navbar() {
                     : <ChevronDown size={14} className="flex-shrink-0" />
                   }
                 </button>
+
+                {/* Compact centered dropdown — lives inside the relative wrapper */}
+                <AnimatePresence>
+                  {megaOpen && (
+                    <div
+                      onMouseEnter={() => setMegaOpen(true)}
+                      onMouseLeave={() => setMegaOpen(false)}
+                      className="hidden lg:block"
+                    >
+                      <MegaMenu onClose={() => setMegaOpen(false)} />
+                    </div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Direct links — blue pill when active */}
@@ -394,19 +407,6 @@ export default function Navbar() {
                 </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Mega Menu ── */}
-        <AnimatePresence>
-          {megaOpen && (
-            <div
-              onMouseEnter={() => setMegaOpen(true)}
-              onMouseLeave={() => setMegaOpen(false)}
-              className="hidden lg:block"
-            >
-              <MegaMenu onClose={() => setMegaOpen(false)} />
-            </div>
           )}
         </AnimatePresence>
       </header>

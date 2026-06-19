@@ -498,7 +498,26 @@ export default function Login() {
         ? {background:'linear-gradient(135deg,#f0f9ff 0%,#eff6ff 40%,#f5f3ff 100%)'}
         : {background:'linear-gradient(135deg,#050010 0%,#0a0020 50%,#020010 100%)'}}>
 
-      {/* Background effects */}
+      {/* ── Back to Main Page button ── */}
+      <Link
+        to="/"
+        className="fixed top-4 left-4 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 group"
+        style={{
+          background: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(12px)',
+          border: isLight ? '1px solid rgba(203,213,225,0.8)' : '1px solid rgba(255,255,255,0.15)',
+          color: isLight ? '#475569' : '#cbd5e1',
+          boxShadow: isLight ? '0 2px 12px rgba(0,0,0,0.08)' : '0 2px 12px rgba(0,0,0,0.4)',
+        }}
+      >
+        <svg
+          className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Main Page
+      </Link>
       {!isLight && <>
         {Array.from({length:50},(_,i)=>(
           <Star key={i} x={rand(1,99)} y={rand(1,99)} size={rand(1,2.5)} delay={rand(0,5)}/>
