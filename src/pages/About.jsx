@@ -127,81 +127,30 @@ export default function About() {
                 <h3 className={`text-base font-bold mb-8 ${headingCls}`}>Our Journey</h3>
 
                 {/* Outer wrapper — positions the vertical line */}
-                <div className="relative pl-10">
+                <div className="relative pl-0 md:pl-0">
 
                   {/* ── Vertical spine: 4 px · dark-blue gradient · shadow ── */}
                   <div
                     aria-hidden="true"
+                    className="absolute left-[9px] md:left-1/2 transform -translate-x-0 md:-translate-x-1/2 top-0 bottom-0 w-[4px] rounded-full"
                     style={{
-                      position: 'absolute',
-                      left: '9px',           /* centre of the 20 px dot */
-                      top: 0,
-                      bottom: 0,
-                      width: '4px',
-                      borderRadius: '9999px',
                       background: 'linear-gradient(180deg,#0F172A 0%,#1E3A8A 20%,#1D4ED8 50%,#2563EB 75%,#3B82F6 100%)',
                       boxShadow: '0 0 0 1px rgba(30,58,138,0.18), 0 0 12px 3px rgba(30,58,138,0.40), 0 4px 24px rgba(37,99,235,0.25)',
                     }}
                   />
 
-                  <div className="space-y-8">
-                    {MILESTONES.map(({ year, title, desc }, i) => (
-                      <motion.div
-                        key={year}
-                        custom={i}
-                        variants={fadeUp}
-                        initial="hidden"
-                        animate="visible"
-                        className="relative flex items-start gap-5"
-                      >
-                        {/* ── Timeline dot: 20 px · dark-blue fill · white border · glow ── */}
-                        <motion.div
-                          whileHover={{ scale: 1.3 }}
-                          transition={{ type: 'spring', stiffness: 460, damping: 16 }}
-                          aria-hidden="true"
-                          style={{
-                            position: 'absolute',
-                            left: '-31px',   /* (10 - half-dot) keeps dot centred on spine */
-                            top: '13px',
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '50%',
-                            flexShrink: 0,
-                            background: 'linear-gradient(135deg,#0F172A 0%,#1E3A8A 45%,#2563EB 100%)',
-                            border: '3px solid #ffffff',
-                            outline: '2px solid #1D4ED8',
-                            outlineOffset: '1px',
-                            boxShadow: [
-                              '0 0 0 4px rgba(30,58,138,0.15)',
-                              '0 0 14px 4px rgba(29,78,216,0.55)',
-                              '0 4px 16px rgba(0,0,0,0.28)',
-                            ].join(','),
-                            zIndex: 3,
-                            cursor: 'default',
-                          }}
-                        >
-                          {/* Pulse ring — only on first/last dot for visual interest */}
-                          {(i === 0 || i === MILESTONES.length - 1) && (
-                            <span
-                              className="absolute rounded-full animate-ping"
-                              style={{
-                                inset: '-4px',
-                                background: 'rgba(37,99,235,0.22)',
-                                animationDuration: '2.8s',
-                              }}
-                            />
-                          )}
-                        </motion.div>
-
-                        {/* ── Milestone card ── */}
+                  <div className="space-y-12 md:space-y-16">
+                    {MILESTONES.map(({ year, title, desc }, i) => {
+                      const isEven = i % 2 === 0;
+                      const card = (
                         <motion.div
                           whileHover={{ y: -2, boxShadow: isLight ? '0 8px 32px rgba(30,58,138,0.12)' : '0 8px 32px rgba(30,58,138,0.35)' }}
                           transition={{ duration: 0.2 }}
                           className={[
-                            'flex-1 rounded-2xl border p-5 transition-colors duration-200 cursor-default',
+                            'w-full max-w-lg rounded-2xl border p-5 transition-colors duration-200 cursor-default text-left',
                             isLight
                               ? 'bg-white border-slate-200 hover:border-blue-200'
-                              : 'bg-white/5 border-white/8 hover:border-blue-500/40',
+                              : 'bg-[#0f0f2d] border-white/8 hover:border-blue-500/40',
                           ].join(' ')}
                         >
                           {/* Year badge */}
@@ -221,8 +170,72 @@ export default function About() {
                           <p className={`text-sm font-bold leading-snug mb-1.5 ${headingCls}`}>{title}</p>
                           <p className={`text-xs leading-relaxed ${subCls}`}>{desc}</p>
                         </motion.div>
-                      </motion.div>
-                    ))}
+                      );
+
+                      return (
+                        <motion.div
+                          key={year}
+                          custom={i}
+                          variants={fadeUp}
+                          initial="hidden"
+                          animate="visible"
+                          className="relative grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full items-start"
+                        >
+                          {/* ── Timeline dot: 20 px · dark-blue fill · white border · glow ── */}
+                          <motion.div
+                            whileHover={{ scale: 1.3 }}
+                            transition={{ type: 'spring', stiffness: 460, damping: 16 }}
+                            aria-hidden="true"
+                            className="absolute left-[1px] md:left-1/2 transform -translate-x-0 md:-translate-x-1/2 w-[20px] h-[20px] rounded-full z-10"
+                            style={{
+                              top: '24px',
+                              background: 'linear-gradient(135deg,#0F172A 0%,#1E3A8A 45%,#2563EB 100%)',
+                              border: '3px solid #ffffff',
+                              outline: '2px solid #1D4ED8',
+                              outlineOffset: '1px',
+                              boxShadow: [
+                                '0 0 0 4px rgba(30,58,138,0.15)',
+                                '0 0 14px 4px rgba(29,78,216,0.55)',
+                                '0 4px 16px rgba(0,0,0,0.28)',
+                              ].join(','),
+                              cursor: 'default',
+                            }}
+                          >
+                            {/* Pulse ring — only on first/last dot for visual interest */}
+                            {(i === 0 || i === MILESTONES.length - 1) && (
+                              <span
+                                className="absolute rounded-full animate-ping"
+                                style={{
+                                  inset: '-4px',
+                                  background: 'rgba(37,99,235,0.22)',
+                                  animationDuration: '2.8s',
+                                }}
+                              />
+                            )}
+                          </motion.div>
+
+                          {isEven ? (
+                            <>
+                              {/* Left side card */}
+                              <div className="pl-8 md:pl-0 md:pr-8 flex justify-start md:justify-end w-full">
+                                {card}
+                              </div>
+                              {/* Spacer for right side on desktop */}
+                              <div className="hidden md:block" />
+                            </>
+                          ) : (
+                            <>
+                              {/* Spacer for left side on desktop */}
+                              <div className="hidden md:block" />
+                              {/* Right side card */}
+                              <div className="pl-8 md:pl-8 flex justify-start w-full">
+                                {card}
+                              </div>
+                            </>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
               </motion.div>

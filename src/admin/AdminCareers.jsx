@@ -4,7 +4,7 @@ import PageHeader from './components/PageHeader';
 import CrudTable  from './components/CrudTable';
 import Modal      from './components/Modal';
 import AdminStatCard from './components/AdminStatCard';
-import { getJobs, createJob, updateJob, deleteJob } from './adminStore';
+import { getJobs, createJob, updateJob, deleteJob, getApplications, updateApplication } from './adminStore';
 
 const EMPTY = { title: '', experience: '', location: '', skills: '', description: '', salary: '' };
 
@@ -18,8 +18,15 @@ const COLUMNS = [
 
 export default function AdminCareers() {
   const [jobs,    setJobs]    = useState(() => getJobs());
+  const [applications, setApplications] = useState([]);
+
+  useEffect(() => {
+    getApplications().then(setApplications);
+  }, []);
+
   const [open,    setOpen]    = useState(false);
   const [editing, setEditing] = useState(null);   // null = new
+  const [viewJob, setViewJob] = useState(null);   // null = no job selected
   const [form,    setForm]    = useState(EMPTY);
   const [confirm, setConfirm] = useState(null);   // row to delete
 
@@ -65,6 +72,7 @@ export default function AdminCareers() {
         rows={jobs}
         onEdit={openEdit}
         onDelete={askDelete}
+        onView={setViewJob}
         searchKeys={['title', 'location', 'skills']}
       />
 
@@ -123,6 +131,91 @@ export default function AdminCareers() {
             className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-colors">
             Yes, Delete
           </button>
+        </div>
+      </Modal>
+
+      {/* View Applicants Modal */}
+      <Modal open={!!viewJob} onClose={() => setViewJob(null)} title={`Applicants for ${viewJob?.title}`} wide>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          {applications.filter(a => a.jobId === viewJob?.id).length === 0 ? (
+            <p className="text-sm text-slate-500 py-4 text-center">No applications yet.</p>
+          ) : (
+            applications.filter(a => a.jobId === viewJob?.id).map(app => (
+              <div key={app.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 relative">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-2">
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-lg">{app.name}</h4>
+                    <p className="text-sm text-slate-500 mt-1">📧 {app.email} &nbsp; 📱 {app.phone}</p>
+                    <p className="text-xs text-slate-400 mt-1">Applied: {new Date(app.applicationDate).toLocaleDateString()}</p>
+                    <a href={app.resume} target="_blank" rel="noreferrer" className="inline-block mt-2 text-xs font-semibold text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded">View Resume ↗</a>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-semibold text-slate-500">Status:</span>
+                    <select
+                      value={app.status}
+                      onChange={async (e) => {
+                        await updateApplication(app.id, { status: e.target.value });
+                        getApplications().then(setApplications);
+                      }}
+                      className="text-xs font-semibold rounded-lg border-slate-200 py-1.5 pl-3 pr-8 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="Applied">Applied</option>
+                      <option value="Shortlisted">Shortlisted</option>
+                      <option value="Selected">Selected</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Interview Scheduling */}
+                <div className="mt-4 pt-3 border-t border-slate-200">
+                  <h5 className="text-xs font-bold text-slate-700 mb-2">Schedule Interview</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date</label>
+                      <input type="date" className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 outline-none focus:border-blue-500"
+                        value={app.interviewDate || ''}
+                        onChange={async (e) => {
+                          await updateApplication(app.id, { interviewDate: e.target.value });
+                          getApplications().then(setApplications);
+                        }} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Time</label>
+                      <input type="time" className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 outline-none focus:border-blue-500"
+                        value={app.interviewTime || ''}
+                        onChange={async (e) => {
+                          await updateApplication(app.id, { interviewTime: e.target.value });
+                          getApplications().then(setApplications);
+                        }} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Link / Venue</label>
+                      <input type="text" placeholder="Zoom link or Room..." className="w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 outline-none focus:border-blue-500"
+                        value={app.interviewVenue || ''}
+                        onChange={async (e) => {
+                          await updateApplication(app.id, { interviewVenue: e.target.value });
+                          getApplications().then(setApplications);
+                        }} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={async () => {
+                        await updateApplication(app.id, { sendEmail: true });
+                        alert(`Email sent to ${app.email}!`);
+                      }}
+                      disabled={!app.interviewDate}
+                      className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Send Email
+                    </button>
+                    {app.interviewDate && <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">Scheduled ✓</span>}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Modal>
     </div>

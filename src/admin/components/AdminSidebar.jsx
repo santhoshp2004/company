@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Briefcase, GraduationCap,
-  Package, Handshake, Settings, LogOut, ChevronRight,
+  Handshake, Settings, LogOut, ChevronRight,
 } from 'lucide-react';
 import { adminLogout } from '../adminStore';
 
@@ -10,7 +10,6 @@ const NAV = [
   { to: '/admin',            label: 'Dashboard',   Icon: LayoutDashboard, end: true },
   { to: '/admin/careers',    label: 'Careers',     Icon: Briefcase       },
   { to: '/admin/internships',label: 'Internships', Icon: GraduationCap   },
-  { to: '/admin/products',   label: 'Products',    Icon: Package         },
   { to: '/admin/partners',   label: 'Partners',    Icon: Handshake       },
   { to: '/admin/settings',   label: 'Settings',    Icon: Settings        },
 ];

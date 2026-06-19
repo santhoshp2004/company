@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme, THEMES } from '../context/ThemeContext';
+import { createApplication } from '../admin/adminStore';
 
 /* ── Static fallback jobs (shown when admin hasn't added any) ── */
 const DEFAULT_JOBS = [
@@ -68,6 +69,27 @@ export default function Careers() {
   const [expandedJob,  setExpandedJob]  = useState(null);
   const [jobs,         setJobs]         = useState(readJobs);
   const [internships,  setInternships]  = useState(readInternships);
+  const [applyJob,     setApplyJob]     = useState(null);
+  const [appForm,      setAppForm]      = useState({ name: '', email: '', phone: '', resume: '' });
+  const [appSuccess,   setAppSuccess]   = useState(false);
+
+  async function handleApplySubmit(e) {
+    e.preventDefault();
+    await createApplication({
+      jobId: applyJob.id,
+      jobRole: applyJob.title || applyJob.role || 'Untitled Role',
+      name: appForm.name,
+      email: appForm.email,
+      phone: appForm.phone,
+      resume: appForm.resume
+    });
+    setAppSuccess(true);
+    setTimeout(() => {
+      setAppSuccess(false);
+      setApplyJob(null);
+      setAppForm({ name: '', email: '', phone: '', resume: '' });
+    }, 2000);
+  }
 
   /* ── Sync from localStorage when admin changes data ──
      • window 'storage' event fires in OTHER tabs
@@ -225,14 +247,13 @@ export default function Careers() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <a
-                                href="mailto:santhoshp232004@gmail.com?subject=Job Application"
-                                onClick={e => e.stopPropagation()}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setApplyJob(job); setAppSuccess(false); setAppForm({ name: '', email: '', phone: '', resume: '' }); }}
                                 className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
                                 style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}
                               >
                                 Apply
-                              </a>
+                              </button>
                               <svg
                                 className={`w-4 h-4 transition-transform ${expandedJob === job.id ? 'rotate-180' : ''} ${subCls}`}
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -376,6 +397,51 @@ export default function Careers() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Application Modal */}
+      {applyJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className={`w-full max-w-md rounded-2xl p-6 ${isLight ? 'bg-white' : 'bg-[#0c0c22] border border-white/10'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-bold ${headingCls}`}>Apply for {applyJob.title || applyJob.role}</h3>
+              <button onClick={() => setApplyJob(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            {appSuccess ? (
+              <div className="text-center py-8">
+                <p className="text-green-500 text-4xl mb-3">✓</p>
+                <p className={`font-semibold ${headingCls}`}>Application submitted successfully.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleApplySubmit} className="space-y-4">
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Full Name *</label>
+                  <input required className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
+                    value={appForm.name} onChange={e => setAppForm(f => ({...f, name: e.target.value}))} />
+                </div>
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Email Address *</label>
+                  <input required type="email" className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
+                    value={appForm.email} onChange={e => setAppForm(f => ({...f, email: e.target.value}))} />
+                </div>
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Phone Number *</label>
+                  <input required className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
+                    value={appForm.phone} onChange={e => setAppForm(f => ({...f, phone: e.target.value}))} />
+                </div>
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Resume/Portfolio Link *</label>
+                  <input required type="url" className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
+                    value={appForm.resume} onChange={e => setAppForm(f => ({...f, resume: e.target.value}))} />
+                </div>
+                <button type="submit" className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+                  style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
+                  Submit Application
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

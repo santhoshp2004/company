@@ -318,20 +318,6 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                {/* Admin Login button */}
-                <Link
-                  to="/admin/login"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90"
-                  style={{
-                    background: 'linear-gradient(135deg,#1e3a5f,#1d4ed8)',
-                    boxShadow: '0 4px 14px rgba(29,78,216,0.35)',
-                  }}
-                  title="Admin Portal"
-                >
-                  <Shield size={14} className="flex-shrink-0" />
-                  Admin Login
-                </Link>
-
                 {/* User Sign In button */}
                 <Link
                   to="/login"

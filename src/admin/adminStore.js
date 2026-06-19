@@ -139,3 +139,49 @@ export function deletePartner(id)     {
   const list = getPartners().filter(p => p.id !== id);
   writeList(PARTNER_KEY, list); return list;
 }
+
+/* ══════════════════════════════════════════
+   APPLICATIONS  —  API Backend
+══════════════════════════════════════════ */
+const API_URL = 'http://localhost:3001/api/applications';
+
+export async function getApplications() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to fetch applications', err);
+    return [];
+  }
+}
+export async function createApplication(data) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, id: makeId(), applicationDate: Date.now(), status: 'Pending' })
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to create application', err);
+    return null;
+  }
+}
+export async function updateApplication(id, data) {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Failed to update application', err);
+    return null;
+  }
+}
+export async function deleteApplication(id) {
+  // Not implemented on the server, returning dummy
+  return [];
+}

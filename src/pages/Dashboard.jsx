@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { products } from '../data/products';
+import { getApplications } from '../admin/adminStore';
 
 const stats = [
   { label: 'Active Products', value: '3', icon: '📦', color: 'from-blue-500 to-cyan-500' },
@@ -19,6 +21,17 @@ const recentActivity = [
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [myApps, setMyApps] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const all = await getApplications();
+      setMyApps(all.filter(a => a.email === user?.email));
+    }
+    load();
+    window.addEventListener('storage', load);
+    return () => window.removeEventListener('storage', load);
+  }, [user]);
 
   return (
     <main className="min-h-screen bg-mesh pt-24 pb-20">
@@ -91,6 +104,40 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* My Applications */}
+        <div className="mt-6 glass rounded-2xl p-6 border border-white/10">
+          <h2 className="text-lg font-bold text-white mb-5">My Applications</h2>
+          {myApps.length === 0 ? (
+            <p className="text-sm text-gray-500">You haven't applied for any jobs yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {myApps.map(app => (
+                <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-white/5 transition-all hover:bg-white/10">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{app.jobRole}</p>
+                    <p className="text-xs text-gray-500 mt-1">Applied on {new Date(app.applicationDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {app.interviewDate && (
+                      <span className="text-xs font-semibold text-orange-400 bg-orange-400/10 px-3 py-1 rounded-full">
+                        Interview: {app.interviewDate}
+                      </span>
+                    )}
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      app.status === 'Selected' ? 'bg-green-500/20 text-green-400' :
+                      app.status === 'Rejected' ? 'bg-red-500/20 text-red-400' :
+                      app.status === 'Shortlisted' ? 'bg-purple-500/20 text-purple-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {app.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick actions */}

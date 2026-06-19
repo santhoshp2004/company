@@ -92,10 +92,14 @@ export default function Home() {
   const headingCls= isLight ? 'text-slate-900' : 'text-white';
   const subTxtCls = isLight ? 'text-slate-600' : 'text-gray-400';
   const divider   = isLight ? 'border-slate-200' : 'border-white/5';
-  const chipCls   = isLight ? 'bg-blue-50 border border-blue-100 text-blue-700' : 'bg-white/5 border border-white/10 text-gray-300';
+  const chipCls   = isLight ? 'bg-red-50 border border-red-100 text-red-600' : 'bg-white/5 border border-white/10 text-gray-300';
+
+  const homeBgStyle = isLight 
+    ? { background: 'linear-gradient(135deg, #fffafa 0%, #fff0f0 40%, #ffe4e4 100%)' } 
+    : t.pageBgStyle;
 
   return (
-    <main style={t.pageBgStyle}>
+    <main style={homeBgStyle}>
 
       {/* ══════════════ HERO ══════════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
@@ -103,8 +107,8 @@ export default function Home() {
         <div className={`absolute inset-0 ${isLight ? 'bg-grid-light' : 'bg-grid'} opacity-40 pointer-events-none`}/>
         {isLight ? (
           <>
-            <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none" style={{background:'radial-gradient(circle,rgba(99,102,241,0.5),transparent)'}}/>
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{background:'radial-gradient(circle,rgba(139,92,246,0.4),transparent)'}}/>
+            <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none" style={{background:'radial-gradient(circle,rgba(239,68,68,0.45),transparent)'}}/>
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none" style={{background:'radial-gradient(circle,rgba(244,63,94,0.35),transparent)'}}/>
           </>
         ) : (
           <>
@@ -166,7 +170,7 @@ export default function Home() {
 
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-          style={{background:`linear-gradient(to top,${isLight?'#f8faff':'#050010'},transparent)`}}/>
+          style={{background:`linear-gradient(to top,${isLight?'#fff0f0':'#050010'},transparent)`}}/>
       </section>
 
       {/* ══════════════ TRUSTED BY ══════════════ */}
@@ -189,7 +193,7 @@ export default function Home() {
       <section className="py-24">
         <div className="section-container">
           <Section className="text-center mb-14">
-            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-blue-600':'text-primary-400'}`}>Our Products</p>
+            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-red-600':'text-primary-400'}`}>Our Products</p>
             <h2 className={`text-4xl sm:text-5xl font-black leading-tight ${headingCls}`}>
               Everything your team needs,<br/>
               <span className={t.gradientText}>in one platform</span>
@@ -222,10 +226,10 @@ export default function Home() {
       </section>
 
       {/* ══════════════ ADVANTAGES ══════════════ */}
-      <section className={`py-24 ${isLight?'bg-slate-50/60':'bg-white/2'}`}>
+      <section className={`py-24 ${isLight?'bg-red-50/40':'bg-white/2'}`}>
         <div className="section-container">
           <Section className="text-center mb-14">
-            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-blue-600':'text-primary-400'}`}>Why USEMETA</p>
+            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-red-600':'text-primary-400'}`}>Why USEMETA</p>
             <h2 className={`text-4xl sm:text-5xl font-black leading-tight ${headingCls}`}>
               Built different,<br/>
               <span className={t.gradientText}>from the ground up</span>
@@ -250,7 +254,7 @@ export default function Home() {
       <section className="py-24">
         <div className="section-container">
           <Section className="text-center mb-14">
-            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-blue-600':'text-primary-400'}`}>Testimonials</p>
+            <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-red-600':'text-primary-400'}`}>Testimonials</p>
             <h2 className={`text-4xl sm:text-5xl font-black leading-tight ${headingCls}`}>
               Loved by engineering<br/>
               <span className={t.gradientText}>teams globally</span>
@@ -291,7 +295,7 @@ export default function Home() {
               <div className="absolute inset-0 pointer-events-none"
                 style={{background:'linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06),rgba(6,182,212,0.05))'}}/>
               <div className="relative z-10">
-                <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-blue-600':'text-primary-400'}`}>Get Started Today</p>
+                <p className={`text-xs font-semibold tracking-widest uppercase mb-3 ${isLight?'text-red-600':'text-primary-400'}`}>Get Started Today</p>
                 <h2 className={`text-4xl sm:text-5xl font-black leading-tight mb-4 ${headingCls}`}>Ready to build faster?</h2>
                 <p className={`max-w-lg mx-auto mb-8 ${subTxtCls}`}>
                   Join 10,000+ organisations already using USEMETA. Start free, no credit card required. Upgrade as you grow.

@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Briefcase, GraduationCap, Package, Handshake, ArrowRight } from 'lucide-react';
+import { Briefcase, GraduationCap, Handshake, ArrowRight } from 'lucide-react';
 import AdminStatCard from './components/AdminStatCard';
-import { getJobs, getInternships, getAdminProducts, getPartners, getAdminSession } from './adminStore';
+import { getJobs, getInternships, getPartners, getAdminSession } from './adminStore';
 
 const QUICK_LINKS = [
   { to: '/admin/careers',     label: 'Manage Jobs',         icon: <Briefcase size={16} />,    color: '#2563eb' },
   { to: '/admin/internships', label: 'Manage Internships',  icon: <GraduationCap size={16} />,color: '#7c3aed' },
-  { to: '/admin/products',    label: 'Manage Products',     icon: <Package size={16} />,      color: '#16a34a' },
   { to: '/admin/partners',    label: 'Manage Partners',     icon: <Handshake size={16} />,    color: '#dc2626' },
 ];
 
@@ -16,13 +15,11 @@ export default function AdminDashboard() {
   const session  = getAdminSession();
   const jobs     = useMemo(getJobs,          []);
   const interns  = useMemo(getInternships,   []);
-  const products = useMemo(getAdminProducts, []);
   const partners = useMemo(getPartners,      []);
 
   const stats = [
     { icon: '💼', label: 'Total Jobs',         value: jobs.length,     color: '#2563eb', delay: 0    },
     { icon: '🎓', label: 'Total Internships',  value: interns.length,  color: '#7c3aed', delay: 0.07 },
-    { icon: '📦', label: 'Total Products',     value: products.length, color: '#16a34a', delay: 0.14 },
     { icon: '🤝', label: 'Total Partners',     value: partners.length, color: '#dc2626', delay: 0.21 },
   ];
 

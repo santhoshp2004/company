@@ -11,7 +11,7 @@ import { useState } from 'react';
  *   onDelete:(row) => void
  *   searchKeys: string[]   — which fields to match search against
  */
-export default function CrudTable({ columns, rows, onEdit, onDelete, searchKeys = [] }) {
+export default function CrudTable({ columns, rows, onEdit, onDelete, onView, searchKeys = [] }) {
   const [q, setQ] = useState('');
 
   const filtered = q.trim()
@@ -78,6 +78,14 @@ export default function CrudTable({ columns, rows, onEdit, onDelete, searchKeys 
                     ))}
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {onView && (
+                          <button
+                            onClick={() => onView(row)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors"
+                          >
+                            <Search size={12} /> View
+                          </button>
+                        )}
                         <button
                           onClick={() => onEdit(row)}
                           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
