@@ -4,9 +4,11 @@ import { useTheme, THEMES } from '../context/ThemeContext';
 
 const SIDE_ITEMS = [
   { key:'overview',    label:'Company Overview', icon:'🏢' },
-  { key:'mission',     label:'Mission',          icon:'🎯' },
   { key:'vision',      label:'Vision',           icon:'🔭' },
+  { key:'mission',     label:'Mission',          icon:'🎯' },
+  { key:'values',      label:'Core Values',      icon:'✨' },
   { key:'leadership',  label:'Leadership',       icon:'👤' },
+  { key:'global',      label:'Global Presence',  icon:'🌍' },
 ];
 
 const MILESTONES = [
@@ -58,27 +60,27 @@ export default function About() {
         <div className="max-w-7xl mx-auto">
           <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-500 mb-1">Who We Are</p>
           <h1 className={`text-2xl font-black ${headingCls}`}>About Beta Softnet</h1>
-          <p className={`text-sm mt-1 ${subCls}`}>Building enterprise software that transforms businesses across India.</p>
+          <p className={`text-sm mt-1 ${subCls}`}>We are a technology-driven company dedicated to delivering...</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex" style={{ minHeight:'calc(100vh - 130px)' }}>
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row" style={{ minHeight:'calc(100vh - 130px)' }}>
         {/* Sidebar */}
-        <aside className={`w-56 flex-shrink-0 sticky top-[62px] self-start ${sidebarBg}`} style={{ height:'calc(100vh - 130px)' }}>
-          <div className="py-4">
-            <p className={`px-5 py-2 text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>Company</p>
+        <aside className={`w-full md:w-56 flex-shrink-0 md:sticky md:top-[62px] self-start z-10 ${sidebarBg}`} style={{ maxHeight:'calc(100vh - 130px)' }}>
+          <div className="py-4 flex md:flex-col overflow-x-auto no-scrollbar border-b md:border-b-0 border-slate-200">
+            <p className={`px-5 py-2 hidden md:block text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>Company</p>
             {SIDE_ITEMS.map(({ key, label, icon }) => (
               <button key={key} type="button" onClick={() => setSection(key)}
-                className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all duration-150 text-left border-r-2
+                className={`flex-shrink-0 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-4 md:px-5 py-3 md:py-3.5 text-sm font-semibold transition-all duration-150 text-left md:border-r-2 border-b-2 md:border-b-0
                   ${section === key
                     ? isLight ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-blue-500/12 text-blue-300 border-blue-400'
                     : isLight ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent' : 'text-gray-400 hover:bg-white/5 hover:text-white border-transparent'}`}>
-                <span>{icon}</span>{label}
-                {section === key && <svg className="w-3.5 h-3.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/></svg>}
+                <span>{icon}</span><span className="whitespace-nowrap">{label}</span>
+                {section === key && <svg className="w-3.5 h-3.5 ml-auto hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/></svg>}
               </button>
             ))}
           </div>
-          <div className={`mx-4 mt-3 p-3 rounded-2xl ${isLight ? 'bg-blue-50 border border-blue-100' : 'bg-blue-500/10 border border-blue-500/20'}`}>
+          <div className={`mx-4 mt-3 p-3 rounded-2xl hidden md:block ${isLight ? 'bg-blue-50 border border-blue-100' : 'bg-blue-500/10 border border-blue-500/20'}`}>
             <p className="text-xs font-bold text-blue-600 mb-1">Get in Touch</p>
             <a href="mailto:santhoshp232004@gmail.com" className="text-xs text-blue-500 hover:text-blue-600 block break-all">santhoshp232004@gmail.com</a>
             <a href="tel:9976017966" className="text-xs text-blue-500 hover:text-blue-600 block mt-0.5">+91 9976017966</a>
@@ -253,6 +255,12 @@ export default function About() {
                     We are committed to making enterprise-grade software accessible, affordable, and genuinely useful — helping organisations across healthcare, education, finance, and business operations work smarter every day.
                   </p>
                 </div>
+              </motion.div>
+            )}
+
+            {section === 'values' && (
+              <motion.div key="values" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
+                <h2 className={`text-xl font-black mb-6 ${headingCls}`}>Our Core Values</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {VALUES.map(({ icon, title, desc }, i) => (
                     <motion.div key={title} custom={i} variants={fadeUp} initial="hidden" animate="visible"
@@ -325,6 +333,21 @@ export default function About() {
                     </a>
                   </div>
                 </motion.div>
+              </motion.div>
+            )}
+
+            {section === 'global' && (
+              <motion.div key="global" initial={{opacity:0,x:12}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-12}} transition={{duration:0.22}}>
+                <h2 className={`text-xl font-black mb-6 ${headingCls}`}>Global Presence</h2>
+                <div className={`rounded-3xl border p-8 mb-6 ${cardBase}`}>
+                  <div className="text-5xl mb-4">🌍</div>
+                  <h3 className={`text-2xl font-black mb-3 ${headingCls}`}>
+                    Serving clients worldwide
+                  </h3>
+                  <p className={`text-base leading-relaxed ${subCls}`}>
+                    We operate with a global mindset, expanding our footprint across Southeast Asia, the Middle East, and beyond, supporting enterprise clients in scaling their operations efficiently.
+                  </p>
+                </div>
               </motion.div>
             )}
 

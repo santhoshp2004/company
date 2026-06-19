@@ -22,14 +22,12 @@ const faqs = [
 ];
 
 const helpCategories = [
-  { icon: '🚀', label: 'Getting Started',       articles: 24 },
-  { icon: '🔧', label: 'Configuration',          articles: 18 },
-  { icon: '🔌', label: 'Integrations',           articles: 31 },
-  { icon: '🔒', label: 'Security & Privacy',     articles: 15 },
-  { icon: '💳', label: 'Billing',                articles: 12 },
-  { icon: '📊', label: 'Analytics & Reports',    articles: 20 },
-  { icon: '🛠️', label: 'Troubleshooting',       articles: 28 },
-  { icon: '📱', label: 'API Reference',          articles: 45 },
+  { icon: '📚', label: 'Help Center',          articles: 124 },
+  { icon: '🔧', label: 'Technical Support',    articles: 48 },
+  { icon: '🎫', label: 'Submit Ticket',        articles: 0 },
+  { icon: '📞', label: 'Contact Support',      articles: 0 },
+  { icon: '❓', label: 'FAQ Section',          articles: 32 },
+  { icon: '🌟', label: 'Customer Success Information',     articles: 15 },
 ];
 
 const fadeUp = {
@@ -50,8 +48,10 @@ export default function Support() {
   const mutedCls   = isLight ? 'text-slate-400' : 'text-gray-600';
   const cardCls    = isLight ? 'bg-white/70 backdrop-blur-xl border border-slate-200/80' : 'bg-white/5 backdrop-blur-md border border-white/10';
   const divider    = isLight ? 'border-slate-100' : 'border-white/8';
-  const inputCls   = isLight ? 'input-field-light' : 'input-field';
-  const faqActiveCls = isLight ? 'border-blue-300/60 bg-blue-50/30' : 'border-primary-500/40';
+  const inputCls   = isLight 
+    ? 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all'
+    : 'w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-900/30 transition-all';
+  const faqActiveCls = isLight ? 'border-blue-300/60 bg-blue-50/30 shadow-sm' : 'border-primary-500/40 bg-white/5';
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -69,7 +69,7 @@ export default function Support() {
             How can we <span className={t.gradientText}>help you?</span>
           </h1>
           <p className={`max-w-lg mx-auto mb-2 ${subTxtCls}`}>
-            Search our help articles or contact our support team directly. We're here to help.
+            Our support team is available to assist customers with technical issues, onboarding, and general inquiries.
           </p>
           <p className={`text-sm ${mutedCls}`}>
             Email: <a href="mailto:santhoshp232004@gmail.com" className={`font-medium ${isLight?'text-blue-600':'text-blue-400'} hover:underline`}>santhoshp232004@gmail.com</a>
@@ -90,14 +90,14 @@ export default function Support() {
         </div>
 
         {/* Help categories */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-20">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-20">
           {helpCategories.map(({ icon, label, articles }, i) => (
             <motion.button key={label} initial="hidden" whileInView="visible" viewport={{once:true}} variants={fadeUp}
               style={{transitionDelay:`${i*0.04}s`}}
-              className={`${cardCls} rounded-2xl p-4 text-center group transition-all duration-300 hover:-translate-y-1`}>
-              <div className="text-3xl mb-2">{icon}</div>
-              <p className={`text-sm font-semibold ${headingCls}`}>{label}</p>
-              <p className={`text-xs mt-0.5 ${mutedCls}`}>{articles} articles</p>
+              className={`${cardCls} rounded-2xl p-5 text-center group transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-blue-300`}>
+              <div className="text-3xl mb-3">{icon}</div>
+              <p className={`text-sm font-bold ${headingCls}`}>{label}</p>
+              {articles > 0 && <p className={`text-xs mt-1 ${mutedCls}`}>{articles} articles</p>}
             </motion.button>
           ))}
         </div>
@@ -126,7 +126,7 @@ export default function Support() {
                 <AnimatePresence>
                   {openFaq===i && (
                     <motion.div initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.25}}>
-                      <div className={`px-6 pb-5 text-sm leading-relaxed ${subTxtCls}`}>{a}</div>
+                      <div className={`px-6 pb-5 text-sm leading-relaxed ${subTxtCls} break-words overflow-hidden`}>{a}</div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -198,8 +198,8 @@ export default function Support() {
                     placeholder="Describe your question in detail..."
                     className={`${inputCls} text-sm py-2.5 resize-none`}/>
                 </div>
-                <button type="submit" className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:-translate-y-0.5"
-                  style={{background:'linear-gradient(135deg,#3B82F6,#8B5CF6)'}}>
+                <button type="submit" className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                  style={{background:'linear-gradient(135deg,#3B82F6,#8B5CF6)', boxShadow: '0 4px 14px rgba(59,130,246,0.3)'}}>
                   Send Message
                 </button>
               </form>

@@ -8,6 +8,7 @@ import Footer          from './components/Footer';
 import ProtectedRoute  from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ThemeSwitcher   from './components/ThemeSwitcher';
+import ScrollToTop     from './components/ScrollToTop';
 
 import Home            from './pages/Home';
 import Products        from './pages/Products';
@@ -94,6 +95,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* Auth — no Navbar/Footer */}
             <Route path="/login"        element={<AuthLayout><Login /></AuthLayout>} />

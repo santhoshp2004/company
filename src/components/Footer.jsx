@@ -3,10 +3,10 @@ import Logo from './Logo';
 import { useTheme, THEMES } from '../context/ThemeContext';
 
 const footerLinks = {
-  Product:  [{ label:'All Products', to:'/products' },{ label:'Pricing', to:'/products' },{ label:'Changelog', to:'/support' },{ label:'Roadmap', to:'/support' }],
-  Company:  [{ label:'About Us', to:'/about' },{ label:'Careers', to:'/careers' },{ label:'Partners', to:'/partners' },{ label:'Brand', to:'/brand' }],
-  Support:  [{ label:'Help Center', to:'/support' },{ label:'Documentation', to:'/support' },{ label:'Community', to:'/support' },{ label:'Status', to:'/support' }],
-  Legal:    [{ label:'Privacy Policy', to:'/support' },{ label:'Terms of Service', to:'/support' },{ label:'Security', to:'/support' },{ label:'Cookies', to:'/support' }],
+  Products:  [{ label:'All Products', to:'/products' },{ label:'Pricing', to:'/products' },{ label:'Changelog', to:'/support' }],
+  'Quick Links':  [{ label:'About Us', to:'/about' },{ label:'Careers', to:'/careers' },{ label:'Partners', to:'/partners' },{ label:'Brand', to:'/brand' }],
+  Support:  [{ label:'Help Center', to:'/support' },{ label:'Contact Us', to:'/support' },{ label:'Community', to:'/support' }],
+  Legal:    [{ label:'Privacy Policy', to:'/support' },{ label:'Terms of Service', to:'/support' }],
 };
 
 const socials = [
@@ -19,11 +19,11 @@ export default function Footer() {
   const { theme } = useTheme();
   const isLight   = theme === THEMES.VISION;
 
-  const bg        = isLight ? 'bg-white border-t border-slate-200'             : 'bg-dark-900 border-t border-white/8';
-  const headingCls= isLight ? 'text-slate-800 font-semibold'                   : 'text-white font-semibold';
-  const linkCls   = isLight ? 'text-slate-500 hover:text-blue-600'             : 'text-gray-400 hover:text-white';
-  const muteColor = isLight ? 'text-slate-400'                                 : 'text-gray-500';
-  const socialCls = isLight ? 'bg-slate-50 border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50'
+  const bg        = isLight ? 'bg-[#E6F4FF] border-t border-blue-200'             : 'bg-dark-900 border-t border-white/8';
+  const headingCls= isLight ? 'text-slate-800 font-bold tracking-wide uppercase'                   : 'text-white font-semibold tracking-wide uppercase';
+  const linkCls   = isLight ? 'text-slate-600 hover:text-blue-700 font-medium'             : 'text-gray-400 hover:text-white';
+  const muteColor = isLight ? 'text-slate-500'                                 : 'text-gray-500';
+  const socialCls = isLight ? 'bg-white border border-blue-200 text-slate-600 hover:text-blue-700 hover:border-blue-400 hover:bg-blue-50 shadow-sm'
                              : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20';
 
   return (

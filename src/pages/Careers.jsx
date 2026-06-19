@@ -31,9 +31,11 @@ const BENEFITS = [
 ];
 
 const SIDE_ITEMS = [
-  { key: 'jobs',        label: 'Open Jobs',   icon: '💼' },
+  { key: 'jobs',        label: 'Open Positions',   icon: '💼' },
   { key: 'internships', label: 'Internships', icon: '🎓' },
-  { key: 'benefits',    label: 'Benefits',    icon: '🎁' },
+  { key: 'benefits',    label: 'Employee Benefits',    icon: '🎁' },
+  { key: 'why',         label: 'Why Join Us', icon: '🌟' },
+  { key: 'learning',    label: 'Learning & Dev', icon: '📚' },
 ];
 
 const fadeUp = {
@@ -128,20 +130,20 @@ export default function Careers() {
           </p>
           <h1 className={`text-2xl font-black ${headingCls}`}>Careers at Beta Softnet</h1>
           <p className={`text-sm mt-1 ${subCls}`}>
-            Join us in building enterprise software that transforms industries.
+            Join our growing team and help shape the future of technology...
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex" style={{ minHeight: 'calc(100vh - 145px)' }}>
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row" style={{ minHeight: 'calc(100vh - 145px)' }}>
 
         {/* ── Left sidebar ── */}
         <aside
-          className={`w-56 flex-shrink-0 sticky top-[80px] self-start ${sidebarBg}`}
-          style={{ height: 'calc(100vh - 145px)', overflowY: 'auto' }}
+          className={`w-full md:w-56 flex-shrink-0 md:sticky md:top-[80px] self-start z-10 ${sidebarBg}`}
+          style={{ maxHeight: 'calc(100vh - 145px)' }}
         >
-          <div className="py-4">
-            <p className={`px-5 py-2 text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
+          <div className="py-4 flex md:flex-col overflow-x-auto no-scrollbar border-b md:border-b-0 border-slate-200">
+            <p className={`px-5 py-2 hidden md:block text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
               Navigation
             </p>
             {SIDE_ITEMS.map(({ key, label, icon }) => (
@@ -149,16 +151,16 @@ export default function Careers() {
                 key={key}
                 type="button"
                 onClick={() => setSection(key)}
-                className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all duration-150 text-left border-r-2 ${
+                className={`flex-shrink-0 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-4 md:px-5 py-3 md:py-3.5 text-sm font-semibold transition-all duration-150 text-left md:border-r-2 border-b-2 md:border-b-0 ${
                   section === key
                     ? isLight ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-blue-500/12 text-blue-300 border-blue-400'
                     : isLight ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent' : 'text-gray-400 hover:bg-white/5 hover:text-white border-transparent'
                 }`}
               >
                 <span>{icon}</span>
-                {label}
+                <span className="whitespace-nowrap">{label}</span>
                 {section === key && (
-                  <svg className="w-3.5 h-3.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 ml-auto hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 )}
@@ -390,6 +392,63 @@ export default function Careers() {
                       <p className={`text-sm leading-relaxed ${subCls}`}>{desc}</p>
                     </motion.div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ════════════ WHY JOIN US ════════════ */}
+            {section === 'why' && (
+              <motion.div
+                key="why"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.22 }}
+              >
+                <h2 className={`text-xl font-black mb-4 ${headingCls}`}>Why Join Us</h2>
+                <div className={`p-6 rounded-2xl border ${cardBase}`}>
+                  <h3 className={`text-lg font-bold mb-3 ${headingCls}`}>We are mission-driven</h3>
+                  <p className={`text-sm mb-4 leading-relaxed ${subCls}`}>Our goal is to build technology that fundamentally changes how businesses operate. When you join our team, you'll be working on problems that matter.</p>
+                  <h3 className={`text-lg font-bold mb-3 ${headingCls}`}>A culture of ownership</h3>
+                  <p className={`text-sm leading-relaxed ${subCls}`}>We don't micromanage. We hire smart people and give them the autonomy to make decisions and drive projects forward.</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ════════════ LEARNING & DEV ════════════ */}
+            {section === 'learning' && (
+              <motion.div
+                key="learning"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.22 }}
+              >
+                <h2 className={`text-xl font-black mb-4 ${headingCls}`}>Learning & Development</h2>
+                <div className={`p-6 rounded-2xl border ${cardBase}`}>
+                  <ul className="space-y-4">
+                    <li className="flex gap-4 items-start">
+                      <span className="text-2xl">📚</span>
+                      <div>
+                        <h4 className={`font-bold ${headingCls}`}>Continuous Learning</h4>
+                        <p className={`text-sm ${subCls}`}>Access to premium courses and certifications to keep your skills sharp.</p>
+                      </div>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                      <span className="text-2xl">🤝</span>
+                      <div>
+                        <h4 className={`font-bold ${headingCls}`}>Mentorship</h4>
+                        <p className={`text-sm ${subCls}`}>Work closely with industry veterans who will guide your career path.</p>
+                      </div>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                      <span className="text-2xl">💡</span>
+                      <div>
+                        <h4 className={`font-bold ${headingCls}`}>Hackathons</h4>
+                        <p className={`text-sm ${subCls}`}>Regular internal hackathons to experiment with new technologies and ideas.</p>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </motion.div>
             )}
