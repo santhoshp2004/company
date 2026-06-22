@@ -90,6 +90,20 @@ export default function Navbar() {
     logout(); setProfileOpen(false); navigate('/');
   }, [logout, navigate]);
 
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    const cleaned = val.trim();
+
+    if (cleaned.startsWith('#')) {
+      setSearchActive(false);
+      setSearchVal('');
+      navigate('/admin');
+      return;
+    }
+
+    setSearchVal(val);
+  };
+
   const isProductsActive = location.pathname.startsWith('/products');
 
   /* ── Computed styles ── */
@@ -224,7 +238,7 @@ export default function Navbar() {
                       autoFocus
                       type="text"
                       value={searchVal}
-                      onChange={e => setSearchVal(e.target.value)}
+                      onChange={handleSearchChange}
                       placeholder="Search products…"
                       className="text-sm text-slate-700 placeholder-slate-400 outline-none bg-transparent flex-1"
                     />
@@ -381,7 +395,7 @@ export default function Navbar() {
                     autoFocus
                     type="text"
                     value={searchVal}
-                    onChange={e => setSearchVal(e.target.value)}
+                    onChange={handleSearchChange}
                     placeholder="Search products…"
                     className="text-sm text-slate-700 placeholder-slate-400 outline-none bg-transparent flex-1"
                   />

@@ -62,8 +62,13 @@ export default function SearchBar({ className = '' }) {
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Enter' && query.trim()) {
-      navigate(`/products?search=${encodeURIComponent(query.trim())}`);
+    const trimmed = query.trim();
+    if (e.key === 'Enter' && trimmed) {
+      if (trimmed.startsWith('#')) {
+        navigate('/admin');
+      } else {
+        navigate(`/products?search=${encodeURIComponent(trimmed)}`);
+      }
       setQuery('');
       setFocused(false);
     }

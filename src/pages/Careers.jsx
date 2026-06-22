@@ -3,22 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { createApplication } from '../admin/adminStore';
 
-/* ── Static fallback jobs (shown when admin hasn't added any) ── */
+/* ── Static fallback jobs ── */
 const DEFAULT_JOBS = [
   { id: 'd1', title: 'Senior Full-Stack Developer', team: 'Engineering', type: 'Full-time', location: 'Remote', experience: '5+ years', skills: 'React,Node.js,PostgreSQL,Docker', description: 'Build and maintain scalable web applications across our product suite.' },
   { id: 'd2', title: 'React Native Developer',      team: 'Engineering', type: 'Full-time', location: 'Remote', experience: '3+ years', skills: 'React Native,JavaScript,iOS,Android', description: 'Develop cross-platform mobile apps for our healthcare and education products.' },
-  { id: 'd3', title: 'Backend Developer (Python)',   team: 'Engineering', type: 'Full-time', location: 'Remote', experience: '4+ years', skills: 'Python,Django,REST APIs,AWS', description: 'Design and build robust APIs powering our enterprise platforms.' },
-  { id: 'd4', title: 'DevOps Engineer',              team: 'Infrastructure', type: 'Full-time', location: 'Remote', experience: '4+ years', skills: 'Kubernetes,CI/CD,Terraform,Linux', description: 'Own deployment pipelines and cloud infrastructure across product environments.' },
-  { id: 'd5', title: 'UI/UX Product Designer',       team: 'Design',       type: 'Full-time', location: 'Remote', experience: '4+ years', skills: 'Figma,Design Systems,User Research,Prototyping', description: 'Lead product design from research to pixel-perfect delivery.' },
-  { id: 'd6', title: 'Business Development Manager', team: 'Sales',        type: 'Full-time', location: 'Chennai', experience: '5+ years', skills: 'B2B Sales,CRM,Negotiation,Client Management', description: 'Drive enterprise sales for Beta Softnet ERP, CRM and vertical products.' },
+  { id: 'd3', title: 'Backend Developer (Python)',  team: 'Engineering', type: 'Full-time', location: 'Remote', experience: '4+ years', skills: 'Python,Django,REST APIs,AWS', description: 'Design and build robust APIs powering our enterprise platforms.' },
 ];
 
 /* ── Static fallback internships ── */
 const DEFAULT_INTERNSHIPS = [
-  { id: 'i1', title: 'Frontend Developer Intern',  team: 'Engineering', duration: '6 months', stipend: '₹15,000/mo', skills: 'React,Tailwind CSS,JavaScript' },
-  { id: 'i2', title: 'Backend Developer Intern',   team: 'Engineering', duration: '6 months', stipend: '₹15,000/mo', skills: 'Node.js,MySQL,REST APIs' },
-  { id: 'i3', title: 'UI Design Intern',           team: 'Design',      duration: '3 months', stipend: '₹10,000/mo', skills: 'Figma,Adobe XD,Prototyping' },
-  { id: 'i4', title: 'Digital Marketing Intern',   team: 'Marketing',   duration: '3 months', stipend: '₹8,000/mo',  skills: 'SEO,Social Media,Content Writing' },
+  { id: 'i1', title: 'Frontend Developer Intern',  team: 'Engineering', duration: '6 months', stipend: '₹15,000/mo', skills: 'React,Tailwind CSS,JavaScript', description: 'Help build intuitive interfaces for our core SAAS products.' },
+  { id: 'i2', title: 'UI Design Intern',           team: 'Design',      duration: '3 months', stipend: '₹10,000/mo', skills: 'Figma,Adobe XD,Prototyping', description: 'Assist in designing wireframes and prototypes for web and mobile apps.' },
 ];
 
 const BENEFITS = [
@@ -30,20 +25,11 @@ const BENEFITS = [
   { icon: '💻', title: 'Work Equipment',    desc: 'MacBook or high-spec laptop + accessories provided from day one.' },
 ];
 
-const SIDE_ITEMS = [
-  { key: 'jobs',        label: 'Open Positions',   icon: '💼' },
-  { key: 'internships', label: 'Internships', icon: '🎓' },
-  { key: 'benefits',    label: 'Employee Benefits',    icon: '🎁' },
-  { key: 'why',         label: 'Why Join Us', icon: '🌟' },
-  { key: 'learning',    label: 'Learning & Dev', icon: '📚' },
-];
-
 const fadeUp = {
-  hidden:  { opacity: 0, y: 14 },
-  visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.06, duration: 0.32 } }),
+  hidden:  { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 };
 
-/* ── Read jobs from localStorage, fall back to defaults ── */
 function readJobs() {
   try {
     const stored = JSON.parse(localStorage.getItem('jobs') || '[]');
@@ -53,7 +39,6 @@ function readJobs() {
   }
 }
 
-/* ── Read internships from localStorage, fall back to defaults ── */
 function readInternships() {
   try {
     const stored = JSON.parse(localStorage.getItem('internships') || '[]');
@@ -67,35 +52,16 @@ export default function Careers() {
   const { theme }   = useTheme();
   const isLight     = theme === THEMES.VISION;
 
-  const [section,      setSection]      = useState('jobs');
   const [expandedJob,  setExpandedJob]  = useState(null);
   const [jobs,         setJobs]         = useState(readJobs);
   const [internships,  setInternships]  = useState(readInternships);
+  
+  // Application Modal State
   const [applyJob,     setApplyJob]     = useState(null);
-  const [appForm,      setAppForm]      = useState({ name: '', email: '', phone: '', resume: '' });
+  const [appForm,      setAppForm]      = useState({ name: '', email: '', phone: '', resume: '', experience: '', skills: '', coverLetter: '' });
   const [appSuccess,   setAppSuccess]   = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleApplySubmit(e) {
-    e.preventDefault();
-    await createApplication({
-      jobId: applyJob.id,
-      jobRole: applyJob.title || applyJob.role || 'Untitled Role',
-      name: appForm.name,
-      email: appForm.email,
-      phone: appForm.phone,
-      resume: appForm.resume
-    });
-    setAppSuccess(true);
-    setTimeout(() => {
-      setAppSuccess(false);
-      setApplyJob(null);
-      setAppForm({ name: '', email: '', phone: '', resume: '' });
-    }, 2000);
-  }
-
-  /* ── Sync from localStorage when admin changes data ──
-     • window 'storage' event fires in OTHER tabs
-     • 2-second poll catches changes in the SAME tab     */
   useEffect(() => {
     function sync() {
       setJobs(readJobs());
@@ -109,398 +75,325 @@ export default function Careers() {
     };
   }, []);
 
-  /* ── Style tokens ── */
+  async function handleApplySubmit(e) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const result = await createApplication({
+      jobId: applyJob.id,
+      jobRole: applyJob.title || applyJob.role || 'Untitled Role',
+      name: appForm.name,
+      email: appForm.email,
+      phone: appForm.phone,
+      resume: appForm.resume,
+      experience: appForm.experience,
+      skills: appForm.skills,
+      coverLetter: appForm.coverLetter
+    });
+    setIsSubmitting(false);
+    if (!result) {
+      alert('Application could not be submitted. Please try again.');
+      return;
+    }
+    setAppSuccess(true);
+    setTimeout(() => {
+      setAppSuccess(false);
+      setApplyJob(null);
+      setAppForm({ name: '', email: '', phone: '', resume: '', experience: '', skills: '', coverLetter: '' });
+    }, 2500);
+  }
+
   const pageBg    = isLight ? 'bg-slate-50'  : 'bg-[#07071a]';
-  const sidebarBg = isLight ? 'bg-white border-r border-slate-200' : 'bg-[#0c0c22] border-r border-white/8';
-  const hdrBg     = isLight ? 'bg-white border-slate-200'          : 'bg-[#0c0c22] border-white/8';
   const headingCls= isLight ? 'text-slate-900' : 'text-white';
-  const subCls    = isLight ? 'text-slate-500' : 'text-gray-400';
+  const subCls    = isLight ? 'text-slate-600' : 'text-gray-400';
   const cardBase  = isLight
-    ? 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-md'
-    : 'bg-white/5 border border-white/8 hover:border-blue-500/30 hover:bg-white/8';
+    ? 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-lg'
+    : 'bg-[#12122b] border border-white/10 hover:border-blue-500/30 hover:bg-[#1a1a3a]';
 
   return (
     <div className={`min-h-screen ${pageBg} pt-[80px]`}>
-
-      {/* Page header */}
-      <div className={`border-b px-6 py-5 ${hdrBg}`}>
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-500 mb-1">
-            We're Hiring
+      
+      {/* ── HERO SECTION ── */}
+      <section className="relative overflow-hidden py-20 lg:py-32 flex items-center justify-center text-center px-4">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: isLight 
+            ? 'radial-gradient(circle at 50% -20%, rgba(59,130,246,0.15), transparent 60%)' 
+            : 'radial-gradient(circle at 50% -20%, rgba(59,130,246,0.2), transparent 60%)'
+        }} />
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="max-w-4xl relative z-10">
+          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-blue-100 text-blue-700 mb-6">
+            We're Hiring!
+          </span>
+          <h1 className={`text-5xl md:text-7xl font-black mb-6 ${headingCls} tracking-tight leading-tight`}>
+            Build the Future of <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Enterprise Tech</span>
+          </h1>
+          <p className={`text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed ${subCls}`}>
+            Join a fast-growing, product-driven company. We are looking for passionate builders, thinkers, and creators who want to make a global impact.
           </p>
-          <h1 className={`text-2xl font-black ${headingCls}`}>Careers at Beta Softnet</h1>
-          <p className={`text-sm mt-1 ${subCls}`}>
-            Join our growing team and help shape the future of technology...
-          </p>
-        </div>
-      </div>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button onClick={() => document.getElementById('open-positions').scrollIntoView({ behavior: 'smooth' })} className="px-8 py-3.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+              View Open Positions
+            </button>
+            <button onClick={() => document.getElementById('internships').scrollIntoView({ behavior: 'smooth' })} className={`px-8 py-3.5 rounded-xl font-bold border transition ${isLight ? 'border-slate-300 text-slate-700 hover:bg-slate-100' : 'border-white/20 text-white hover:bg-white/10'}`}>
+              Internship Programs
+            </button>
+          </div>
+        </motion.div>
+      </section>
 
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row" style={{ minHeight: 'calc(100vh - 145px)' }}>
-
-        {/* ── Left sidebar ── */}
-        <aside
-          className={`w-full md:w-56 flex-shrink-0 md:sticky md:top-[80px] self-start z-10 ${sidebarBg}`}
-          style={{ maxHeight: 'calc(100vh - 145px)' }}
-        >
-          <div className="py-4 flex md:flex-col overflow-x-auto no-scrollbar border-b md:border-b-0 border-slate-200">
-            <p className={`px-5 py-2 hidden md:block text-[10px] font-bold tracking-[0.3em] uppercase ${isLight ? 'text-slate-400' : 'text-gray-600'}`}>
-              Navigation
+      {/* ── COMPANY INTRODUCTION & WORK CULTURE ── */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp}>
+            <h2 className={`text-3xl font-black mb-6 ${headingCls}`}>Our Culture & Mission</h2>
+            <p className={`text-lg mb-6 leading-relaxed ${subCls}`}>
+              At Beta Softnet, our mission is to build robust SaaS solutions that fundamentally change how businesses operate. When you join our team, you'll be working on problems that matter.
             </p>
-            {SIDE_ITEMS.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSection(key)}
-                className={`flex-shrink-0 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-4 md:px-5 py-3 md:py-3.5 text-sm font-semibold transition-all duration-150 text-left md:border-r-2 border-b-2 md:border-b-0 ${
-                  section === key
-                    ? isLight ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-blue-500/12 text-blue-300 border-blue-400'
-                    : isLight ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent' : 'text-gray-400 hover:bg-white/5 hover:text-white border-transparent'
-                }`}
-              >
-                <span>{icon}</span>
-                <span className="whitespace-nowrap">{label}</span>
-                {section === key && (
-                  <svg className="w-3.5 h-3.5 ml-auto hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                  </svg>
-                )}
-              </button>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-xl">🚀</div>
+                <div>
+                  <h4 className={`font-bold text-lg ${headingCls}`}>Innovation First</h4>
+                  <p className={`text-sm ${subCls}`}>We don't settle for the status quo. We encourage experimentation and new ideas.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 text-xl">🤝</div>
+                <div>
+                  <h4 className={`font-bold text-lg ${headingCls}`}>Autonomy & Ownership</h4>
+                  <p className={`text-sm ${subCls}`}>We hire smart people and give them the freedom to make decisions and drive projects forward.</p>
+                </div>
+              </li>
+            </ul>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="relative h-[400px] rounded-3xl overflow-hidden shadow-2xl">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" alt="Team Collaboration" className="absolute inset-0 w-full h-full object-cover" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── EMPLOYEE BENEFITS ── */}
+      <section className={`py-20 px-4 ${isLight ? 'bg-white' : 'bg-[#0c0c22]'}`}>
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`text-3xl font-black mb-4 ${headingCls}`}>Perks & Benefits</motion.h2>
+          <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`text-lg mb-16 max-w-2xl mx-auto ${subCls}`}>We invest heavily in our team so they can focus on building great products.</motion.p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            {BENEFITS.map((b, i) => (
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className={`p-8 rounded-2xl transition-all duration-300 ${cardBase}`}>
+                <div className="text-4xl mb-4">{b.icon}</div>
+                <h3 className={`text-xl font-bold mb-2 ${headingCls}`}>{b.title}</h3>
+                <p className={`text-sm leading-relaxed ${subCls}`}>{b.desc}</p>
+              </motion.div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Open application nudge */}
-          <div className={`mx-4 mt-2 p-4 rounded-2xl ${isLight ? 'bg-blue-50 border border-blue-100' : 'bg-blue-500/10 border border-blue-500/20'}`}>
-            <p className="text-xs font-bold text-blue-600 mb-1">Open Application</p>
-            <p className={`text-xs mb-2 ${subCls}`}>Don't see your role?</p>
-            <a
-              href="mailto:santhoshp232004@gmail.com?subject=Career Application"
-              className="text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors"
-            >
-              Email Us →
-            </a>
+      {/* ── OPEN POSITIONS ── */}
+      <section id="open-positions" className="py-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Open Positions</h2>
+            <p className={`text-lg ${subCls}`}>Find your next big opportunity. We're actively hiring for the following roles.</p>
           </div>
-        </aside>
 
-        {/* ── Main content ── */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          <AnimatePresence mode="wait">
+          {jobs.length === 0 ? (
+            <div className={`p-12 text-center rounded-3xl border ${isLight ? 'bg-white border-slate-200' : 'bg-[#0c0c22] border-white/10'}`}>
+              <p className="text-4xl mb-4">📋</p>
+              <h3 className={`text-xl font-bold mb-2 ${headingCls}`}>No open positions right now</h3>
+              <p className={subCls}>Check back later or drop us an email.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {jobs.map((job) => {
+                const title  = job.title || job.role || 'Untitled Role';
+                const team   = job.team  || 'General';
+                const type   = job.type  || 'Full-time';
+                const loc    = job.location || '—';
+                const exp    = job.experience || job.exp || '—';
+                const desc   = job.description || job.desc || '';
+                const salary = job.salary || '';
+                const skills = Array.isArray(job.skills) ? job.skills : String(job.skills || '').split(',').map(s => s.trim()).filter(Boolean);
 
-            {/* ════════════ JOBS ════════════ */}
-            {section === 'jobs' && (
-              <motion.div
-                key="jobs"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h2 className={`text-xl font-black mb-5 ${headingCls}`}>
-                  Open Positions{' '}
-                  <span className="text-blue-500">({jobs.length})</span>
-                </h2>
-
-                {jobs.length === 0 ? (
-                  <div className="text-center py-16">
-                    <p className="text-4xl mb-3">📋</p>
-                    <p className={`text-sm ${subCls}`}>No open positions right now. Check back soon.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {jobs.map((job, i) => {
-                      /* Handle both admin field names and default field names */
-                      const title  = job.title || job.role || 'Untitled Role';
-                      const team   = job.team  || 'General';
-                      const type   = job.type  || 'Full-time';
-                      const loc    = job.location || '—';
-                      const exp    = job.experience || job.exp || '—';
-                      const desc   = job.description || job.desc || '';
-                      const salary = job.salary || '';
-                      const skills = Array.isArray(job.skills)
-                        ? job.skills
-                        : String(job.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-
-                      return (
-                        <motion.div
-                          key={job.id}
-                          custom={i}
-                          variants={fadeUp}
-                          initial="hidden"
-                          animate="visible"
-                          className={`rounded-2xl border p-5 cursor-pointer transition-all duration-200 ${
-                            expandedJob === job.id
-                              ? isLight ? 'border-blue-300 shadow-lg shadow-blue-50' : 'border-blue-500/40'
-                              : cardBase
-                          }`}
-                          onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-1">
-                                <h3 className={`text-base font-bold ${headingCls}`}>{title}</h3>
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/15 text-blue-400'}`}>
-                                  {team}
-                                </span>
-                              </div>
-                              <div className={`flex flex-wrap gap-3 text-xs ${subCls}`}>
-                                <span>📍 {loc}</span>
-                                <span>🕒 {type}</span>
-                                <span>💼 {exp}</span>
-                                {salary && <span>💰 {salary}</span>}
+                return (
+                  <motion.div key={job.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`rounded-2xl border p-6 lg:p-8 cursor-pointer transition-all duration-300 ${expandedJob === job.id ? (isLight ? 'border-blue-400 shadow-xl shadow-blue-100' : 'border-blue-500/60 bg-[#12122b]') : cardBase}`} onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                          <h3 className={`text-2xl font-bold ${headingCls}`}>{title}</h3>
+                          <span className={`text-xs px-3 py-1 rounded-full font-bold ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-blue-400'}`}>{team}</span>
+                        </div>
+                        <div className={`flex flex-wrap gap-4 text-sm font-medium ${subCls}`}>
+                          <span className="flex items-center gap-1">📍 {loc}</span>
+                          <span className="flex items-center gap-1">🕒 {type}</span>
+                          <span className="flex items-center gap-1">💼 {exp}</span>
+                          {salary && <span className="flex items-center gap-1">💰 {salary}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <button onClick={(e) => { e.stopPropagation(); setApplyJob(job); setAppSuccess(false); setAppForm({ name: '', email: '', phone: '', resume: '', experience: '', skills: '', coverLetter: '' }); }} className="px-6 py-2.5 rounded-xl font-bold text-white shadow-lg transition-transform hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>
+                          Apply Now
+                        </button>
+                        <svg className={`w-5 h-5 transition-transform duration-300 ${expandedJob === job.id ? 'rotate-180' : ''} ${subCls}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                    
+                    <AnimatePresence>
+                      {expandedJob === job.id && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-6 pt-6 border-t overflow-hidden" style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.1)' }}>
+                          {desc && (
+                            <div className="mb-6">
+                              <h4 className={`text-sm font-bold uppercase tracking-wider mb-2 ${headingCls}`}>Job Description</h4>
+                              <p className={`text-base leading-relaxed ${subCls}`}>{desc}</p>
+                            </div>
+                          )}
+                          {skills.length > 0 && (
+                            <div>
+                              <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 ${headingCls}`}>Required Skills</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {skills.map(s => <span key={s} className={`px-3 py-1.5 text-sm rounded-lg font-semibold ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-gray-200'}`}>{s}</span>)}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setApplyJob(job); setAppSuccess(false); setAppForm({ name: '', email: '', phone: '', resume: '' }); }}
-                                className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                                style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}
-                              >
-                                Apply
-                              </button>
-                              <svg
-                                className={`w-4 h-4 transition-transform ${expandedJob === job.id ? 'rotate-180' : ''} ${subCls}`}
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          </div>
-
-                          {expandedJob === job.id && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.22 }}
-                              className="mt-4 pt-4 border-t overflow-hidden"
-                              style={{ borderColor: isLight ? '#e2e8f0' : 'rgba(255,255,255,0.08)' }}
-                            >
-                              {desc && (
-                                <p className={`text-sm mb-3 ${subCls}`}>{desc}</p>
-                              )}
-                              {skills.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                  {skills.map(s => (
-                                    <span
-                                      key={s}
-                                      className={`px-2.5 py-1 text-xs rounded-lg font-medium ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-gray-300'}`}
-                                    >
-                                      {s}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </motion.div>
                           )}
                         </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* ════════════ INTERNSHIPS ════════════ */}
-            {section === 'internships' && (
-              <motion.div
-                key="internships"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h2 className={`text-xl font-black mb-5 ${headingCls}`}>
-                  Internship Programs{' '}
-                  <span className="text-violet-500">({internships.length})</span>
-                </h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {internships.map((item, i) => {
-                    const title    = item.title    || item.role     || 'Internship';
-                    const team     = item.team     || 'General';
-                    const duration = item.duration || '—';
-                    const stipend  = item.stipend  || '—';
-                    const desc     = item.description || '';
-                    const skills   = Array.isArray(item.skills)
-                      ? item.skills
-                      : String(item.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-
-                    return (
-                      <motion.div
-                        key={item.id}
-                        custom={i}
-                        variants={fadeUp}
-                        initial="hidden"
-                        animate="visible"
-                        className={`rounded-2xl border p-5 ${cardBase}`}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className={`text-base font-bold ${headingCls}`}>{title}</h3>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ml-2 ${isLight ? 'bg-violet-50 text-violet-600' : 'bg-violet-500/15 text-violet-400'}`}>
-                            {team}
-                          </span>
-                        </div>
-                        <div className={`flex gap-4 text-xs mb-3 ${subCls}`}>
-                          <span>⏱ {duration}</span>
-                          <span>💰 {stipend}</span>
-                        </div>
-                        {skills.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {skills.map(s => (
-                              <span key={s} className={`px-2 py-0.5 text-xs rounded-md ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/8 text-gray-300'}`}>
-                                {s}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {desc && <p className={`text-xs mb-4 leading-relaxed ${subCls}`}>{desc}</p>}
-                        <a
-                          href="mailto:santhoshp232004@gmail.com?subject=Internship Application"
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                          style={{ background: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' }}
-                        >
-                          Apply Now
-                        </a>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-
-            {/* ════════════ BENEFITS ════════════ */}
-            {section === 'benefits' && (
-              <motion.div
-                key="benefits"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h2 className={`text-xl font-black mb-2 ${headingCls}`}>Employee Benefits</h2>
-                <p className={`text-sm mb-6 ${subCls}`}>We invest in people who invest in building great products.</p>
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {BENEFITS.map(({ icon, title, desc }, i) => (
-                    <motion.div
-                      key={title}
-                      custom={i}
-                      variants={fadeUp}
-                      initial="hidden"
-                      animate="visible"
-                      className={`rounded-2xl border p-5 ${cardBase}`}
-                    >
-                      <div className="text-3xl mb-3">{icon}</div>
-                      <h3 className={`text-base font-bold mb-1.5 ${headingCls}`}>{title}</h3>
-                      <p className={`text-sm leading-relaxed ${subCls}`}>{desc}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* ════════════ WHY JOIN US ════════════ */}
-            {section === 'why' && (
-              <motion.div
-                key="why"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h2 className={`text-xl font-black mb-4 ${headingCls}`}>Why Join Us</h2>
-                <div className={`p-6 rounded-2xl border ${cardBase}`}>
-                  <h3 className={`text-lg font-bold mb-3 ${headingCls}`}>We are mission-driven</h3>
-                  <p className={`text-sm mb-4 leading-relaxed ${subCls}`}>Our goal is to build technology that fundamentally changes how businesses operate. When you join our team, you'll be working on problems that matter.</p>
-                  <h3 className={`text-lg font-bold mb-3 ${headingCls}`}>A culture of ownership</h3>
-                  <p className={`text-sm leading-relaxed ${subCls}`}>We don't micromanage. We hire smart people and give them the autonomy to make decisions and drive projects forward.</p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ════════════ LEARNING & DEV ════════════ */}
-            {section === 'learning' && (
-              <motion.div
-                key="learning"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.22 }}
-              >
-                <h2 className={`text-xl font-black mb-4 ${headingCls}`}>Learning & Development</h2>
-                <div className={`p-6 rounded-2xl border ${cardBase}`}>
-                  <ul className="space-y-4">
-                    <li className="flex gap-4 items-start">
-                      <span className="text-2xl">📚</span>
-                      <div>
-                        <h4 className={`font-bold ${headingCls}`}>Continuous Learning</h4>
-                        <p className={`text-sm ${subCls}`}>Access to premium courses and certifications to keep your skills sharp.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-4 items-start">
-                      <span className="text-2xl">🤝</span>
-                      <div>
-                        <h4 className={`font-bold ${headingCls}`}>Mentorship</h4>
-                        <p className={`text-sm ${subCls}`}>Work closely with industry veterans who will guide your career path.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-4 items-start">
-                      <span className="text-2xl">💡</span>
-                      <div>
-                        <h4 className={`font-bold ${headingCls}`}>Hackathons</h4>
-                        <p className={`text-sm ${subCls}`}>Regular internal hackathons to experiment with new technologies and ideas.</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
-        </main>
-      </div>
-
-      {/* Application Modal */}
-      {applyJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className={`w-full max-w-md rounded-2xl p-6 ${isLight ? 'bg-white' : 'bg-[#0c0c22] border border-white/10'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-lg font-bold ${headingCls}`}>Apply for {applyJob.title || applyJob.role}</h3>
-              <button onClick={() => setApplyJob(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
             </div>
-            {appSuccess ? (
-              <div className="text-center py-8">
-                <p className="text-green-500 text-4xl mb-3">✓</p>
-                <p className={`font-semibold ${headingCls}`}>Application submitted successfully.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleApplySubmit} className="space-y-4">
-                <div>
-                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Full Name *</label>
-                  <input required className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
-                    value={appForm.name} onChange={e => setAppForm(f => ({...f, name: e.target.value}))} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Email Address *</label>
-                  <input required type="email" className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
-                    value={appForm.email} onChange={e => setAppForm(f => ({...f, email: e.target.value}))} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Phone Number *</label>
-                  <input required className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
-                    value={appForm.phone} onChange={e => setAppForm(f => ({...f, phone: e.target.value}))} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-semibold mb-1 ${subCls}`}>Resume/Portfolio Link *</label>
-                  <input required type="url" className={`w-full px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 text-slate-800' : 'border-white/10 bg-white/5 text-white'}`}
-                    value={appForm.resume} onChange={e => setAppForm(f => ({...f, resume: e.target.value}))} />
-                </div>
-                <button type="submit" className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5"
-                  style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
-                  Submit Application
-                </button>
-              </form>
-            )}
+          )}
+        </div>
+      </section>
+
+      {/* ── INTERNSHIP PROGRAMS ── */}
+      <section id="internships" className={`py-20 px-4 ${isLight ? 'bg-slate-100' : 'bg-[#0a0a1a]'}`}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Internship Programs</h2>
+            <p className={`text-lg ${subCls}`}>Kickstart your career with hands-on experience on real-world projects.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {internships.map((item, i) => {
+              const title    = item.title    || item.role     || 'Internship';
+              const team     = item.team     || 'General';
+              const duration = item.duration || '—';
+              const stipend  = item.stipend  || '—';
+              const desc     = item.description || '';
+              const skills   = Array.isArray(item.skills) ? item.skills : String(item.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+
+              return (
+                <motion.div key={item.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className={`rounded-3xl p-8 ${cardBase}`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className={`text-2xl font-bold ${headingCls}`}>{title}</h3>
+                    <span className={`text-xs px-3 py-1 rounded-full font-bold ml-3 flex-shrink-0 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-400'}`}>{team}</span>
+                  </div>
+                  <div className={`flex flex-wrap gap-4 text-sm font-medium mb-4 ${subCls}`}>
+                    <span>⏱ {duration}</span>
+                    <span>💰 {stipend}</span>
+                  </div>
+                  {desc && <p className={`text-sm mb-6 leading-relaxed ${subCls}`}>{desc}</p>}
+                  {skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {skills.map(s => <span key={s} className={`px-2.5 py-1 text-xs rounded-md font-semibold ${isLight ? 'bg-white border border-slate-200 text-slate-600' : 'bg-white/5 border border-white/10 text-gray-300'}`}>{s}</span>)}
+                    </div>
+                  )}
+                  <button onClick={() => { setApplyJob(item); setAppSuccess(false); setAppForm({ name: '', email: '', phone: '', resume: '', experience: 'Intern', skills: '', coverLetter: '' }); }} className="w-full py-3 rounded-xl font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #7C3AED, #DB2777)' }}>
+                    Apply for Internship
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
-      )}
+      </section>
+
+      {/* ── CONTACT HR SECTION ── */}
+      <section className="py-24 px-4 text-center">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className={`max-w-3xl mx-auto rounded-3xl p-10 md:p-16 border ${isLight ? 'bg-white border-slate-200' : 'bg-[#12122b] border-white/10'}`}>
+          <div className="text-5xl mb-6">📩</div>
+          <h2 className={`text-3xl font-black mb-4 ${headingCls}`}>Can't find the perfect role?</h2>
+          <p className={`text-lg mb-8 ${subCls}`}>We are always looking for talented individuals. Send us your resume and we'll keep you in mind for future opportunities.</p>
+          <a href="mailto:careers@betasoftnet.com" className="inline-block px-8 py-4 rounded-xl font-bold text-white shadow-lg transition-transform hover:-translate-y-1" style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+            Email HR Department
+          </a>
+        </motion.div>
+      </section>
+
+      {/* ── ENHANCED APPLICATION MODAL ── */}
+      <AnimatePresence>
+        {applyJob && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className={`w-full max-w-2xl my-8 rounded-3xl overflow-hidden shadow-2xl relative ${isLight ? 'bg-white' : 'bg-[#0f0f29] border border-white/10'}`}>
+              
+              <div className={`px-6 py-5 border-b flex items-center justify-between ${isLight ? 'border-slate-100 bg-slate-50/50' : 'border-white/10 bg-white/5'}`}>
+                <div>
+                  <h3 className={`text-xl font-bold ${headingCls}`}>Application Form</h3>
+                  <p className={`text-sm ${subCls}`}>{applyJob.title || applyJob.role}</p>
+                </div>
+                <button onClick={() => setApplyJob(null)} className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isLight ? 'hover:bg-slate-200 text-slate-500' : 'hover:bg-white/10 text-gray-400'}`}>✕</button>
+              </div>
+
+              <div className="p-6 md:p-8">
+                {appSuccess ? (
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner shadow-green-200">✓</div>
+                    <h3 className={`text-2xl font-bold mb-2 ${headingCls}`}>Application Submitted Successfully</h3>
+                    <p className={subCls}>Thank you for applying. Our HR team will review your profile and get back to you soon.</p>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleApplySubmit} className="space-y-5">
+                    <div className="grid md:grid-cols-2 gap-5">
+                      <div>
+                        <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Full Name *</label>
+                        <input required placeholder="John Doe" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.name} onChange={e => setAppForm(f => ({...f, name: e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Email Address *</label>
+                        <input required type="email" placeholder="john@example.com" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.email} onChange={e => setAppForm(f => ({...f, email: e.target.value}))} />
+                      </div>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-5">
+                      <div>
+                        <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Phone Number *</label>
+                        <input required placeholder="+91 98765 43210" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.phone} onChange={e => setAppForm(f => ({...f, phone: e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Years of Experience *</label>
+                        <input required placeholder="e.g. 3 Years / Fresher" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.experience} onChange={e => setAppForm(f => ({...f, experience: e.target.value}))} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Key Skills *</label>
+                      <input required placeholder="React, Node.js, Leadership..." className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.skills} onChange={e => setAppForm(f => ({...f, skills: e.target.value}))} />
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Resume / Portfolio Link *</label>
+                      <input required type="url" placeholder="https://linkedin.com/in/johndoe or Google Drive link" className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.resume} onChange={e => setAppForm(f => ({...f, resume: e.target.value}))} />
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-bold mb-1.5 ${headingCls}`}>Cover Letter / Message</label>
+                      <textarea rows={4} placeholder="Why are you a good fit?" className={`w-full px-4 py-3 rounded-xl border resize-none focus:ring-2 focus:outline-none transition-all ${isLight ? 'border-slate-200 focus:border-blue-500 focus:ring-blue-100 bg-white' : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20 bg-white/5 text-white'}`} value={appForm.coverLetter} onChange={e => setAppForm(f => ({...f, coverLetter: e.target.value}))} />
+                    </div>
+
+                    <div className="pt-4">
+                      <button type="submit" disabled={isSubmitting} className="w-full py-4 rounded-xl text-lg font-bold text-white shadow-xl transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed" style={{ background: 'linear-gradient(135deg,#2563EB,#7C3AED)' }}>
+                        {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

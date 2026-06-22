@@ -141,31 +141,49 @@ export function deletePartner(id)     {
 }
 
 /* ══════════════════════════════════════════
-   APPLICATIONS  —  API Backend
+   APPLICATIONS  —  API Backend with localStorage fallback
 ══════════════════════════════════════════ */
 const API_URL = 'http://localhost:3001/api/applications';
+const APPS_KEY = 'applications';
+
+function getStoredApplications() {
+  return readList(APPS_KEY);
+}
+function writeStoredApplications(list) {
+  writeList(APPS_KEY, list);
+}
 
 export async function getApplications() {
+  const localApps = getStoredApplications();
   try {
     const res = await fetch(API_URL);
-    if (!res.ok) return [];
-    return await res.json();
+    if (!res.ok) throw new Error('Failed to fetch applications');
+    const data = await res.json();
+    writeStoredApplications(data);
+    return data;
   } catch (err) {
     console.error('Failed to fetch applications', err);
-    return [];
+    return localApps;
   }
 }
 export async function createApplication(data) {
+  const newApp = { ...data, id: makeId(), applicationDate: Date.now(), status: 'Pending' };
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, id: makeId(), applicationDate: Date.now(), status: 'Pending' })
+      body: JSON.stringify(newApp)
     });
-    return await res.json();
+    if (!res.ok) throw new Error('Failed to create application');
+    const saved = await res.json();
+    const list = [...getStoredApplications(), saved];
+    writeStoredApplications(list);
+    return saved;
   } catch (err) {
     console.error('Failed to create application', err);
-    return null;
+    const fallback = [...getStoredApplications(), newApp];
+    writeStoredApplications(fallback);
+    return newApp;
   }
 }
 export async function updateApplication(id, data) {
@@ -175,13 +193,40 @@ export async function updateApplication(id, data) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return await res.json();
+    if (!res.ok) throw new Error('Failed to update application');
+    const updated = await res.json();
+    const list = getStoredApplications().map((app) => app.id === id ? { ...app, ...updated } : app);
+    writeStoredApplications(list);
+    return updated;
   } catch (err) {
     console.error('Failed to update application', err);
-    return null;
+    const list = getStoredApplications().map((app) => app.id === id ? { ...app, ...data } : app);
+    writeStoredApplications(list);
+    return list.find((app) => app.id === id) || null;
   }
 }
+
+export async function scheduleInterview(id, interview, sendEmail = false) {
+  return updateApplication(id, { interview, status: 'Interview Scheduled', sendEmail });
+}
+
+export async function resendInterviewInvitation(id) {
+  return updateApplication(id, { sendEmail: true });
+}
+
 export async function deleteApplication(id) {
-  // Not implemented on the server, returning dummy
-  return [];
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete application');
+    const remaining = getStoredApplications().filter((app) => app.id !== id);
+    writeStoredApplications(remaining);
+    return true;
+  } catch (err) {
+    console.error('Failed to delete application', err);
+    const remaining = getStoredApplications().filter((app) => app.id !== id);
+    writeStoredApplications(remaining);
+    return true;
+  }
 }
